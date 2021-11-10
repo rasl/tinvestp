@@ -1,4 +1,4 @@
--- Adminer 4.8.1 PostgreSQL 13.4 (Debian 13.4-1.pgdg100+1) dump
+BEGIN;
 
 INSERT INTO "asset" ("uuid", "asset_type", "ticker", "name", "description", "created", "updated") VALUES
 ('2dee7cdb-0b00-4bc8-b0ab-e05a060522ce',	'deposit',	'',	'deposit',	NULL,	'2021-11-09 20:11:50.976296+00',	'2021-11-09 20:11:50.976296+00'),
@@ -27,3 +27,5 @@ INSERT INTO "transaction" ("uuid", "operation", "type", "account_uuid", "quantit
 ('a0e80054-ab51-4f42-820c-8a33ef7c2c61',	'outcome',	'sell',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	2.00,	'ca94630a-c556-44f0-ae13-2508de001a32');
 
 -- 2021-11-09 20:40:31.164169+00
+
+COMMIT;
