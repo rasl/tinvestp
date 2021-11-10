@@ -6,7 +6,7 @@ CREATE TYPE "asset_type" AS ENUM (
 
 CREATE TABLE "asset" (
   "uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  "asset_type" asset_type NOT NULL,
+  "type" asset_type NOT NULL,
   "ticker" text NOT NULL,
   "name" text NULL,
   "description" text NULL,
@@ -15,41 +15,40 @@ CREATE TABLE "asset" (
 );
 
 CREATE TABLE "asset_bond" (
-  "uuid" uuid PRIMARY KEY,
+  "asset_uuid" uuid PRIMARY KEY,
   "coupon" decimal(15,2),
   "created" timestamptz null,
   "updated" timestamptz null,
-  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
+  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("asset_uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
 );
 
 CREATE TABLE "asset_stock" (
-  "uuid" uuid PRIMARY KEY,
+  "asset_uuid" uuid PRIMARY KEY,
   "created" timestamptz null,
   "updated" timestamptz null,
-  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
+  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("asset_uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
 );
 
 CREATE TABLE "asset_deposit" (
-  "uuid" uuid PRIMARY KEY,
+  "asset_uuid" uuid PRIMARY KEY,
   "percent" real,
   "created" timestamptz null,
   "updated" timestamptz null,
-  CONSTRAINT "fk_asset_uuid"
-    FOREIGN KEY("uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
+  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("asset_uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
 );
 
 CREATE TABLE "asset_currency" (
-  "uuid" uuid PRIMARY KEY,
+  "asset_uuid" uuid PRIMARY KEY,
   "created" timestamptz null,
   "updated" timestamptz null,
-  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
+  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("asset_uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
 );
 
 CREATE TABLE "asset_other" (
-  "uuid" uuid PRIMARY KEY,
+  "asset_uuid" uuid PRIMARY KEY,
   "created" timestamptz null,
   "updated" timestamptz null,
-  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
+  CONSTRAINT "fk_asset_uuid" FOREIGN KEY("asset_uuid") REFERENCES "asset" ("uuid") ON DELETE CASCADE
 );
 
 CREATE TABLE "account" (
@@ -61,11 +60,11 @@ CREATE TABLE "account" (
 CREATE TABLE "exchange_rate" (
   "uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "datetime" timestamptz NOT NULL,
-  "asset_uuid_from" uuid NOT NULL,
-  "asset_uuid_to" uuid NOT NULL,
-  "price" decimal(15,2) NOT NULL,
-  CONSTRAINT "fk_asset_uuid_from" FOREIGN KEY("asset_uuid_from") REFERENCES "asset" ("uuid"),
-  CONSTRAINT "fk_asset_uuid_to" FOREIGN KEY("asset_uuid_to") REFERENCES "asset" ("uuid")
+  "asset_from_uuid" uuid NOT NULL,
+  "asset_to_uuid" uuid NOT NULL,
+  "exchange_rate_value" decimal(15,8) NOT NULL,
+  CONSTRAINT "fk_asset_from_uuid" FOREIGN KEY("asset_from_uuid") REFERENCES "asset" ("uuid"),
+  CONSTRAINT "fk_asset_to_uuid" FOREIGN KEY("asset_to_uuid") REFERENCES "asset" ("uuid")
 );
 
 CREATE TYPE transaction_type AS ENUM (
@@ -82,9 +81,10 @@ CREATE TABLE "transaction" (
   "type" transaction_type NOT NULL,
   "account_uuid" uuid NOT NULL,
   "quantity" decimal(15,2) NOT NULL,
-  "bid_price" uuid NOT NULL,
-  CONSTRAINT "fk_account" FOREIGN KEY("account_uuid") REFERENCES "account" ("uuid"),
-  CONSTRAINT "fk_exchange_rate" FOREIGN KEY("bid_price") REFERENCES "exchange_rate" ("uuid")
+  "datetime" timestamptz NOT NULL DEFAULT now(),
+  "exchange_rate_uuid" uuid NOT NULL,
+  CONSTRAINT "fk_account_uuid" FOREIGN KEY("account_uuid") REFERENCES "account" ("uuid"),
+  CONSTRAINT "fk_exchange_rate_uuid" FOREIGN KEY("exchange_rate_uuid") REFERENCES "exchange_rate" ("uuid")
 );
 
 /**
