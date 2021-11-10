@@ -87,6 +87,63 @@ CREATE TABLE "transaction" (
   CONSTRAINT "fk_exchange_rate_uuid" FOREIGN KEY("exchange_rate_uuid") REFERENCES "exchange_rate" ("uuid")
 );
 
+CREATE VIEW "asset_history" AS (
+SELECT
+transaction.uuid AS transaction_uuid, transaction.operation, transaction.type AS transaction_type, transaction.quantity,
+account.uuid AS account_uuid,
+asset.uuid AS asset_uuid, asset.ticker, asset.name, asset.description, asset.type AS asset_type,
+exchange_rate.uuid AS exchage_rate_uuid, exchange_rate.exchange_rate_value, exchange_rate.datetime, exchange_rate.asset_from_uuid, exchange_rate.asset_to_uuid
+FROM
+transaction
+LEFT JOIN account on (transaction.account_uuid = account.uuid)
+LEFT JOIN asset on (account.asset_uuid = asset.uuid)
+LEFT JOIN exchange_rate on (transaction.exchange_rate_uuid = exchange_rate.uuid)
+);
+
+CREATE VIEW "asset_RUB" AS (
+SELECT
+uuid, type, ticker, name, description, created, updated
+FROM asset
+WHERE ticker = 'RUB'
+);
+
+-- SQL ANSI
+CREATE VIEW "exchange_rate_last2" AS (
+SELECT
+    er1.uuid, er1.asset_from_uuid, er1.asset_to_uuid, er1.datetime, er1.exchange_rate_value
+FROM exchange_rate er1
+LEFT JOIN exchange_rate er2 on (
+    er1.asset_from_uuid = er2.asset_from_uuid and er1.asset_to_uuid = er2.asset_to_uuid and er1.datetime < er2.datetime
+    )
+WHERE er2.uuid is NULL
+);
+
+-- Postgres feature row_number() over()
+CREATE VIEW "exchange_rate_last" AS (
+SELECT
+er.uuid, er.datetime, er.asset_from_uuid, er.asset_to_uuid, er.exchange_rate_value
+FROM (
+SELECT
+    ROW_NUMBER() OVER(PARTITION BY asset_from_uuid, asset_to_uuid ORDER BY datetime DESC) AS row_number, exchange_rate.*
+FROM exchange_rate
+) er
+WHERE er.row_number = 1
+)
+
+CREATE VIEW "asset_quantity_current" AS (
+SELECT
+account.uuid as account_uuid,
+asset.uuid as asset_uuid, asset.type as asset_type, asset.name as asset_name, asset.description as asset_description,
+SUM(CASE
+  WHEN t.operation = 'income' THEN t.quantity
+  WHEN t.operation = 'outcome' THEN -t.quantity
+END) as current_quantity
+FROM transaction t
+LEFT JOIN account  on (t.account_uuid = account.uuid)
+LEFT JOIN asset on (asset.uuid = account.asset_uuid)
+GROUP BY asset.uuid, account.uuid, t.account_uuid
+)
+
 /**
 -- TODO view
 SELECT
