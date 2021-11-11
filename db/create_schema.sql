@@ -133,20 +133,6 @@ FROM exchange_rate
 WHERE er.row_number = 1
 );
 
-CREATE VIEW "asset_quantity_current" AS (
-SELECT
-account.uuid as account_uuid,
-asset.uuid as asset_uuid, asset.type as asset_type, asset.name as asset_name, asset.description as asset_description,
-SUM(CASE
-  WHEN t.operation = 'income' THEN t.quantity
-  WHEN t.operation = 'outcome' THEN -t.quantity
-END) as current_quantity
-FROM transaction t
-LEFT JOIN account  on (t.account_uuid = account.uuid)
-LEFT JOIN asset on (asset.uuid = account.asset_uuid)
-GROUP BY asset.uuid, account.uuid, t.account_uuid
-);
-
 CREATE VIEW "asset_result" AS (
 SELECT
 asset_uuid, asset_type, asset_name,
