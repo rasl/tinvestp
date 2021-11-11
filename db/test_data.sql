@@ -25,14 +25,36 @@ INSERT INTO "exchange_rate" ("uuid", "datetime", "asset_from_uuid", "asset_to_uu
 ('6275fe18-2d3f-4fe2-89cb-455099a6d229',	'2021-11-10 22:45:03.220695+00',	'23f30753-96b0-4c42-93db-84151638304c',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	342.00000000),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f77',	'2021-11-10 22:45:03.70046+00',	'23f30753-96b0-4c42-93db-84151638304c',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	339.00000000);
 
+INSERT INTO "event" ("uuid", "type", "description", "reason_account_uuid") VALUES
+('cb8d4406-2c7a-4a39-92cc-466fc3423f71',	'buy',	'put to deposit',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f72',	'sell',	'take from deposit',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f90',	'interest',	'interest from deposit',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f73',	'buy',	'buy bonds',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f74',	'sell',	'sell bonds',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f75',	'sell',	'sell bonds',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f76',	'buy',	'buy stock: sber',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f77',	'buy',	'sell stock: sber',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f78',	'dividends',	'dividends stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f79',	'commission',	'commission stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f80',	'tax',	'tax stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f81',	'coupons',	'coupons bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f82',	'commission',	'commission bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f83',	'tax',	'tax bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef');
 
-INSERT INTO "transaction" ("uuid", "operation", "type", "account_uuid", "quantity", "datetime", "exchange_rate_uuid") VALUES
-('7ccaa190-0c8a-4d25-84be-1254ae801302',	'income',	'buy',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	500000.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
-('ee4caf07-6377-4a84-ba7e-9ff42763753f',	'outcome',	'sell',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	10.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
-('1cd56f4b-13ca-4deb-96ec-5f0ba1cc396d',	'income',	'buy',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	5.00,	'2021-11-09 20:38:49.11399+00',	'9861a4bf-405a-401f-bcca-68c8991ac7a0'),
-('751a309c-a761-4ab9-8e47-66c3ce561b45',	'outcome',	'sell',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	1.00,	'2021-11-09 20:38:49.11399+00',	'93a1db41-92df-466b-a44e-4d1b47a5118e'),
-('a0e80054-ab51-4f42-820c-8a33ef7c2c61',	'outcome',	'sell',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	2.00,	'2021-11-09 20:38:49.11399+00',	'ca94630a-c556-44f0-ae13-2508de001a32'),
-('649033ba-a6d8-479f-b2fa-7a31e753faa1',	'income',	'buy',	'6fe60719-1501-4149-9c87-197c7307fdb9',	10.00,	'2021-11-10 22:46:22.078756+00',	'8c7d538a-80de-4ccc-b3c6-eb954ec809e4'),
-('8c5a7cbd-8688-45ea-9805-182039e6ddfc',	'outcome',	'sell',	'6fe60719-1501-4149-9c87-197c7307fdb9',	5.00,	'2021-11-10 22:46:22.078756+00',	'6275fe18-2d3f-4fe2-89cb-455099a6d229');
+INSERT INTO "transaction" ("uuid", "operation", "event_uuid", "account_uuid", "quantity", "datetime", "exchange_rate_uuid") VALUES
+('7ccaa190-0c8a-4d25-84be-1254ae801302',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f71',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	500000.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('ee4caf07-6377-4a84-ba7e-9ff42763753f',	'outcome',	'cb8d4406-2c7a-4a39-92cc-466fc3423f72',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	10.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('7ccaa190-0c8a-4d25-84be-1254ae801322',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f90',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	555.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('1cd56f4b-13ca-4deb-96ec-5f0ba1cc396d',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f73',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	5.00,	'2021-11-09 20:38:49.11399+00',	'9861a4bf-405a-401f-bcca-68c8991ac7a0'),
+('751a309c-a761-4ab9-8e47-66c3ce561b45',	'outcome',	'cb8d4406-2c7a-4a39-92cc-466fc3423f74',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	1.00,	'2021-11-09 20:38:49.11399+00',	'93a1db41-92df-466b-a44e-4d1b47a5118e'),
+('a0e80054-ab51-4f42-820c-8a33ef7c2c61',	'outcome',	'cb8d4406-2c7a-4a39-92cc-466fc3423f75',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	2.00,	'2021-11-09 20:38:49.11399+00',	'ca94630a-c556-44f0-ae13-2508de001a32'),
+('649033ba-a6d8-479f-b2fa-7a31e753faa1',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f76',	'6fe60719-1501-4149-9c87-197c7307fdb9',	10.00,	'2021-11-10 22:46:22.078756+00',	'8c7d538a-80de-4ccc-b3c6-eb954ec809e4'),
+('8c5a7cbd-8688-45ea-9805-182039e6ddfc',	'outcome',	'cb8d4406-2c7a-4a39-92cc-466fc3423f77',	'6fe60719-1501-4149-9c87-197c7307fdb9',	5.00,	'2021-11-10 22:46:22.078756+00',	'6275fe18-2d3f-4fe2-89cb-455099a6d229'),
+('7ccaa190-0c8a-4d25-84be-1254ae801312',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f78',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	222.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('7ccaa190-0c8a-4d25-84be-1254ae801303',	'outcome',	'cb8d4406-2c7a-4a39-92cc-466fc3423f79',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	22.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('7ccaa190-0c8a-4d25-84be-1254ae801304',	'outcome',	'cb8d4406-2c7a-4a39-92cc-466fc3423f80',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	2.20,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('7ccaa190-0c8a-4d25-84be-1254ae801305',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f81',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	333.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('7ccaa190-0c8a-4d25-84be-1254ae801306',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f82',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	33.00,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759'),
+('7ccaa190-0c8a-4d25-84be-1254ae801307',	'income',	'cb8d4406-2c7a-4a39-92cc-466fc3423f83',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	3.30,	'2021-11-09 20:38:49.11399+00',	'85e6fdf5-286f-4016-affd-8cdd6462b759');
 
 COMMIT;
