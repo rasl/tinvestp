@@ -147,82 +147,52 @@ LEFT JOIN asset on (asset.uuid = account.asset_uuid)
 GROUP BY asset.uuid, account.uuid, t.account_uuid
 );
 
-CREATE VIEW "asset_volume_current" AS (
-SELECT volume_aggregation.*,
-quantity_current * exchange_rate_value_current AS volume_current
-FROM
-(
+CREATE VIEW "asset_result" AS (
 SELECT
 asset_uuid, asset_type, asset_name,
 account_uuid,
+buy_quantity, spent_on_buy,
+sell_quantity, earned_on_sell,
+remain_quantity, remain_quantity * exchange_rate_value_current AS remain_value,
+earned_on_sell + remain_quantity * exchange_rate_value_current AS total_value,
+earned_on_sell + remain_quantity * exchange_rate_value_current - spent_on_buy AS absolute_margin,
+((earned_on_sell + remain_quantity * exchange_rate_value_current) / spent_on_buy - 1) * 100 AS percent_margin
+
+FROM (
+
+SELECT
+asset_uuid, asset_type, asset_name,
+account_uuid,
+SUM(CASE WHEN transaction_type = 'buy' THEN transaction_quantity END) AS buy_quantity,
+SUM(CASE WHEN transaction_type = 'sell' THEN transaction_quantity END) AS sell_quantity,
 SUM(CASE
   WHEN transaction_operation = 'income' THEN transaction_quantity
   WHEN transaction_operation = 'outcome' THEN -transaction_quantity
-END) as quantity_current,
+END) as remain_quantity,
 
-exchange_rate_value_current
+exchange_rate_value_current,
+SUM(CASE WHEN transaction_type = 'buy' THEN transaction_quantity * exchange_rate_value  END) as spent_on_buy,
+SUM(CASE WHEN transaction_type = 'sell' THEN transaction_quantity * exchange_rate_value  END) as earned_on_sell
+
 FROM (
 
 SELECT
 t.uuid AS transaction_uuid, t.operation AS transaction_operation, t.type AS transaction_type, t.quantity AS transaction_quantity,
 account.uuid AS account_uuid,
-asset.uuid AS asset_uuid, asset.type as asset_type, asset.name as asset_name, asset.description as asset_description,
-erl.exchange_rate_value AS exchange_rate_value_current, erl.uuid AS exchange_rate_uuid, erl.asset_from_uuid AS exchange_rate_asset_from_uuid, erl.asset_to_uuid AS exchange_rate_asset_to_uuid
-
+asset.uuid AS asset_uuid, asset.type AS asset_type, asset.name AS asset_name, asset.description AS asset_description,
+erl.exchange_rate_value AS exchange_rate_value_current, erl.uuid AS exchange_rate_uuid, erl.asset_from_uuid AS exchange_rate_asset_from_uuid, erl.asset_to_uuid AS exchange_rate_asset_to_uuid,
+er.exchange_rate_value AS exchange_rate_value
 FROM transaction t
 LEFT JOIN account  ON (t.account_uuid = account.uuid)
 LEFT JOIN asset ON (asset.uuid = account.asset_uuid)
 LEFT JOIN asset_rub ON (1=1)
-LEFT JOIN exchange_rate_last erl on (erl.asset_from_uuid=account.asset_uuid and erl.asset_to_uuid=asset_rub.uuid)
+LEFT JOIN exchange_rate_last erl ON (erl.asset_from_uuid=account.asset_uuid AND erl.asset_to_uuid=asset_rub.uuid)
+LEFT JOIN exchange_rate er ON (t.exchange_rate_uuid = er.uuid)
 
 ) quantity_aggregation
 GROUP BY asset_uuid, asset_type, asset_name, account_uuid, exchange_rate_value_current
 
-) volume_aggregation
+) sum_aggregation
 );
-
-/**
--- TODO P0 (technical): create view with earning columns
-SELECT
-volume_by_current_price + sell_volume - buy_volume AS absolute_margin,
-(volume_by_current_price + sell_volume - buy_volume) / buy_volume * 100 AS percent_margin,
-buy_quantity, buy_volume,
-sell_quantity, sell_volume,
-*
-FROM (
-SELECT
-reminder_quantity, reminder_quantity * current_price AS volume_by_current_price,
-*
-FROM
-(SELECT
-array_agg((CASE WHEN transaction.type = 'sell' THEN transaction.quantity  END)),
-SUM(CASE WHEN transaction.type = 'sell' THEN transaction.quantity END) AS sell_quantity,
-
-array_agg((CASE WHEN transaction.type = 'buy' THEN transaction.quantity  END)),
-SUM(CASE WHEN transaction.type = 'buy' THEN transaction.quantity END) AS buy_quantity,
-
-array_agg((CASE WHEN transaction.type = 'buy' THEN transaction.quantity WHEN transaction.type = 'sell' THEN -transaction.quantity END)),
-SUM(CASE WHEN transaction.type = 'buy' THEN transaction.quantity WHEN transaction.type = 'sell' THEN -transaction.quantity END) as reminder_quantity,
-
-array_agg(CASE WHEN transaction.type = 'sell' THEN transaction.quantity * exchange_rate.price  END),
-SUM(CASE WHEN transaction.type = 'sell' THEN transaction.quantity * exchange_rate.price  END) as sell_volume,
-
-array_agg(CASE WHEN transaction.type = 'buy' THEN transaction.quantity * exchange_rate.price  END),
-SUM(CASE WHEN transaction.type = 'buy' THEN transaction.quantity * exchange_rate.price  END) as buy_volume,
-
-1 AS current_price,
-
-asset.uuid, asset.asset_type, asset.ticker, asset.name,
-array_agg(transaction.uuid), array_agg(transaction.type), array_agg(transaction.quantity),
-array_agg(exchange_rate.datetime), array_agg(exchange_rate.price), array_agg(exchange_rate.asset_uuid_from), array_agg(exchange_rate.asset_uuid_to)
-
-
-FROM asset
-INNER JOIN transaction ON (transaction.asset_uuid = asset.uuid)
-LEFT JOIN exchange_rate ON (exchange_rate.uuid = transaction.bid_price)
-GROUP BY asset.uuid
-) sub
-) subsub
-*/
 
 COMMIT;
