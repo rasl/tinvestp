@@ -75,6 +75,7 @@ CREATE TYPE transaction_operation AS ENUM(
   'income', 'outcome'
 );
 
+-- TODO P0 architecture: taxes, commissions, dividends, coupons, other when one asset is source other asset
 CREATE TABLE "transaction" (
   "uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "operation" transaction_operation NOT NULL,
@@ -100,11 +101,13 @@ LEFT JOIN asset on (account.asset_uuid = asset.uuid)
 LEFT JOIN exchange_rate on (transaction.exchange_rate_uuid = exchange_rate.uuid)
 );
 
-CREATE VIEW "asset_RUB" AS (
+-- TODO P1 (technical or architecture): need take choose other currencies $, EUR and etc.
+CREATE VIEW "asset_rub" AS (
 SELECT
 uuid, type, ticker, name, description, created, updated
 FROM asset
 WHERE ticker = 'RUB'
+LIMIT 1
 );
 
 -- SQL ANSI
@@ -128,7 +131,7 @@ SELECT
 FROM exchange_rate
 ) er
 WHERE er.row_number = 1
-)
+);
 
 CREATE VIEW "asset_quantity_current" AS (
 SELECT
@@ -142,10 +145,44 @@ FROM transaction t
 LEFT JOIN account  on (t.account_uuid = account.uuid)
 LEFT JOIN asset on (asset.uuid = account.asset_uuid)
 GROUP BY asset.uuid, account.uuid, t.account_uuid
-)
+);
+
+CREATE VIEW "asset_volume_current" AS (
+SELECT volume_aggregation.*,
+quantity_current * exchange_rate_value_current AS volume_current
+FROM
+(
+SELECT
+asset_uuid, asset_type, asset_name,
+account_uuid,
+SUM(CASE
+  WHEN transaction_operation = 'income' THEN transaction_quantity
+  WHEN transaction_operation = 'outcome' THEN -transaction_quantity
+END) as quantity_current,
+
+exchange_rate_value_current
+FROM (
+
+SELECT
+t.uuid AS transaction_uuid, t.operation AS transaction_operation, t.type AS transaction_type, t.quantity AS transaction_quantity,
+account.uuid AS account_uuid,
+asset.uuid AS asset_uuid, asset.type as asset_type, asset.name as asset_name, asset.description as asset_description,
+erl.exchange_rate_value AS exchange_rate_value_current, erl.uuid AS exchange_rate_uuid, erl.asset_from_uuid AS exchange_rate_asset_from_uuid, erl.asset_to_uuid AS exchange_rate_asset_to_uuid
+
+FROM transaction t
+LEFT JOIN account  ON (t.account_uuid = account.uuid)
+LEFT JOIN asset ON (asset.uuid = account.asset_uuid)
+LEFT JOIN asset_rub ON (1=1)
+LEFT JOIN exchange_rate_last erl on (erl.asset_from_uuid=account.asset_uuid and erl.asset_to_uuid=asset_rub.uuid)
+
+) quantity_aggregation
+GROUP BY asset_uuid, asset_type, asset_name, account_uuid, exchange_rate_value_current
+
+) volume_aggregation
+);
 
 /**
--- TODO view
+-- TODO P0 (technical): create view with earning columns
 SELECT
 volume_by_current_price + sell_volume - buy_volume AS absolute_margin,
 (volume_by_current_price + sell_volume - buy_volume) / buy_volume * 100 AS percent_margin,
@@ -158,8 +195,6 @@ reminder_quantity, reminder_quantity * current_price AS volume_by_current_price,
 *
 FROM
 (SELECT
--- TODO taxes, commissions, dividends, coupons, other (?)
--- TODO income, outcome types
 array_agg((CASE WHEN transaction.type = 'sell' THEN transaction.quantity  END)),
 SUM(CASE WHEN transaction.type = 'sell' THEN transaction.quantity END) AS sell_quantity,
 
@@ -175,7 +210,7 @@ SUM(CASE WHEN transaction.type = 'sell' THEN transaction.quantity * exchange_rat
 array_agg(CASE WHEN transaction.type = 'buy' THEN transaction.quantity * exchange_rate.price  END),
 SUM(CASE WHEN transaction.type = 'buy' THEN transaction.quantity * exchange_rate.price  END) as buy_volume,
 
-1 AS current_price, -- TODO current price = LAST PRICE by datetime
+1 AS current_price,
 
 asset.uuid, asset.asset_type, asset.ticker, asset.name,
 array_agg(transaction.uuid), array_agg(transaction.type), array_agg(transaction.quantity),
