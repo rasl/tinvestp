@@ -25,7 +25,7 @@ INSERT INTO "exchange_rate" ("uuid", "datetime", "asset_from_uuid", "asset_to_uu
 ('6275fe18-2d3f-4fe2-89cb-455099a6d229',	'2021-11-10 22:45:03.220695+00',	'23f30753-96b0-4c42-93db-84151638304c',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	342.00000000),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f77',	'2021-11-10 22:45:03.70046+00',	'23f30753-96b0-4c42-93db-84151638304c',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	339.00000000);
 
-INSERT INTO "event" ("uuid", "type", "description", "reason_account_uuid") VALUES
+INSERT INTO "event" ("uuid", "type", "description", "source_account_uuid") VALUES
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f71',	'buy',	'put to deposit',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f72',	'sell',	'take from deposit',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f90',	'interest',	'interest from deposit',	'8d8fde97-d609-4d0f-bed5-73d1a91d70e0'),

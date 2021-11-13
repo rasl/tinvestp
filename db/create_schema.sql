@@ -75,8 +75,8 @@ CREATE TABLE "event" (
   "uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "type" event_type NOT NULL,
   "description" text,
-  "reason_account_uuid" uuid,
-  CONSTRAINT "fk_account_uuid" FOREIGN KEY("reason_account_uuid") REFERENCES "account" ("uuid")
+  "source_account_uuid" uuid,
+  CONSTRAINT "fk_source_account_uuid" FOREIGN KEY("source_account_uuid") REFERENCES "account" ("uuid")
 );
 
 CREATE TYPE transaction_operation AS ENUM(
