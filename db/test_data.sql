@@ -1,13 +1,15 @@
 BEGIN;
 
 INSERT INTO "asset" ("uuid", "type", "ticker", "name", "description", "created", "updated") VALUES
-('2dee7cdb-0b00-4bc8-b0ab-e05a060522ce',	'deposit',	'',	'deposit',	NULL,	'2021-11-09 20:11:50.976296+00',	'2021-11-09 20:11:50.976296+00'),
+('2dee7cdb-0b00-4bc8-b0ab-e05a060522ce',	'deposit',	'DEP',	'deposit',	NULL,	'2021-11-09 20:11:50.976296+00',	'2021-11-09 20:11:50.976296+00'),
+('2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',	'bank account',	'CURRENT',	'current bank account',	NULL,	'2021-11-09 20:11:50.976296+00',	'2021-11-09 20:11:50.976296+00'),
 ('2689e5ba-c736-4596-874e-9c5e5b91e5fa',	'currency',	'RUB',	'ruble',	NULL,	'2021-11-09 20:12:20.606554+00',	'2021-11-09 20:12:20.606554+00'),
-('f11000d7-37ed-4823-b95b-6fcaffc443ac',	'bond',	'',	'bond',	NULL,	'2021-11-09 20:13:03.524126+00',	'2021-11-09 20:13:03.524126+00'),
+('f11000d7-37ed-4823-b95b-6fcaffc443ac',	'bond',	'OFZ',	'bond',	NULL,	'2021-11-09 20:13:03.524126+00',	'2021-11-09 20:13:03.524126+00'),
 ('23f30753-96b0-4c42-93db-84151638304c',	'stock',	'SBR',	'sber',	NULL,	'2021-11-10 22:41:40.128216+00',	'2021-11-10 22:41:40.128216+00');
 
 INSERT INTO "account" ("uuid", "asset_uuid") VALUES
 ('8d8fde97-d609-4d0f-bed5-73d1a91d70e0',	'2dee7cdb-0b00-4bc8-b0ab-e05a060522ce'),
+('8d8fde97-d609-4d0f-bed5-73d1a91d1111',	'2dee7cdb-0b00-4bc8-b0ab-e05a060522cc'),
 ('dbe79474-d296-4cb7-82d0-956b29b371db',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa'),
 ('d054d47b-8ba7-4dd0-a205-e94881da2cba',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa'),
 ('8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef',	'f11000d7-37ed-4823-b95b-6fcaffc443ac'),
@@ -16,6 +18,8 @@ INSERT INTO "account" ("uuid", "asset_uuid") VALUES
 
 INSERT INTO "exchange_rate" ("uuid", "datetime", "asset_from_uuid", "asset_to_uuid", "exchange_rate_value") VALUES
 ('85e6fdf5-286f-4016-affd-8cdd6462b759',	'2021-11-09 20:16:15.941286+00',	'2dee7cdb-0b00-4bc8-b0ab-e05a060522ce',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	1.00000000),
+('85e6fdf5-286f-4016-affd-8cdd6462b760',	'2021-11-09 20:16:15.941286+00',	'2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	1.00000000),
+
 ('9861a4bf-405a-401f-bcca-68c8991ac7a0',	'2021-11-09 20:16:58.55737+00',	'f11000d7-37ed-4823-b95b-6fcaffc443ac',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	1000.00000000),
 ('93a1db41-92df-466b-a44e-4d1b47a5118e',	'2021-11-09 20:17:26.341329+00',	'f11000d7-37ed-4823-b95b-6fcaffc443ac',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	1100.00000000),
 ('ca94630a-c556-44f0-ae13-2508de001a32',	'2021-11-09 20:18:01.327279+00',	'f11000d7-37ed-4823-b95b-6fcaffc443ac',	'2689e5ba-c736-4596-874e-9c5e5b91e5fa',	1150.00000000),
