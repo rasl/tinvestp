@@ -195,4 +195,76 @@ CREATE VIEW "asset_buy_sell_result" AS (
   ) sum_aggregation
 );
 
+-- TODO technical or architecture: necessary to consider an asset type (currency) of the source account
+CREATE VIEW "account_extra_result" AS (
+  SELECT
+  source_account_uuid,
+  to_accounts,
+  (CASE WHEN interest_from_source_qnt IS NULL THEN 0 ELSE interest_from_source_qnt END) AS interest_from_source_qnt,
+  (CASE WHEN dividends_from_source_qnt IS NULL THEN 0 ELSE dividends_from_source_qnt END) AS dividends_from_source_qnt,
+  (CASE WHEN coupons_from_source_qnt IS NULL THEN 0 ELSE coupons_from_source_qnt END) AS coupons_from_source_qnt,
+  (CASE WHEN tax_from_source_qnt IS NULL THEN 0 ELSE tax_from_source_qnt END) AS tax_from_source_qnt,
+  (CASE WHEN commission_from_source_qnt IS NULL THEN 0 ELSE commission_from_source_qnt END) AS commission_from_source_qnt,
+  (CASE WHEN other_from_source_qnt IS NULL THEN 0 ELSE other_from_source_qnt END) AS other_from_source_qnt,
+  (CASE WHEN total_result_qnt IS NULL THEN 0 ELSE total_result_qnt END) AS total_result_qnt
+
+  FROM (
+    SELECT
+    e.source_account_uuid, array_agg(t.account_uuid) to_accounts,
+    SUM(CASE WHEN e.type = 'interest' THEN t.quantity END) AS interest_from_source_qnt,
+    SUM(CASE WHEN e.type = 'dividends' THEN t.quantity END) AS dividends_from_source_qnt,
+    SUM(CASE WHEN e.type = 'coupons' THEN t.quantity END) AS coupons_from_source_qnt,
+    SUM(CASE WHEN e.type = 'tax' THEN t.quantity END) AS tax_from_source_qnt,
+    SUM(CASE WHEN e.type = 'commission' THEN t.quantity END) AS commission_from_source_qnt,
+    SUM(CASE WHEN e.type = 'other' THEN t.quantity END) AS other_from_source_qnt,
+    SUM(CASE
+      WHEN e.type in ('buy', 'sell') THEN 0
+      WHEN t.operation = 'income' THEN t.quantity
+      WHEN t.operation = 'outcome' THEN -t.quantity
+    END) AS total_result_qnt
+
+    FROM transaction t
+    LEFT JOIN event e on (t.event_uuid = e.uuid)
+    GROUP BY e.source_account_uuid
+  ) remove_null_aggregation
+);
+
+CREATE VIEW "asset_result" AS (
+  SELECT
+  asset_uuid, asset_type, asset_name, account_uuid,
+  current_buy_sell_result + extra_result AS total_result,
+  current_buy_sell_result + extra_result - spent_on_buy AS absolute_margin,
+  ((current_buy_sell_result + extra_result) / spent_on_buy - 1) * 100 AS percent_margin,
+  current_buy_sell_result,
+  sell_result,
+  extra_result,
+  buy_quantity, spent_on_buy, sell_quantity, earned_on_sell,
+  remain_quantity, exchange_rate_value_current, remain_value,
+  extra_interest,
+  extra_dividends,
+  extra_coupons,
+  extra_tax,
+  extra_commission,
+  extra_other
+
+  FROM (
+    SELECT
+    ar.asset_uuid, ar.asset_type, ar.asset_name, ar.account_uuid,
+    ar.total_value as current_buy_sell_result,
+    CASE WHEN ar.absolute_margin IS NULL THEN 0 ELSE ar.absolute_margin END as sell_result,
+    CASE WHEN aer.total_result_qnt IS NULL THEN 0 ELSE aer.total_result_qnt END as extra_result,
+    ar.buy_quantity, ar.spent_on_buy, ar.sell_quantity, ar.earned_on_sell,
+    ar.remain_quantity, ar.exchange_rate_value_current, ar.remain_value,
+    aer.interest_from_source_qnt AS extra_interest,
+    aer.dividends_from_source_qnt AS extra_dividends,
+    aer.coupons_from_source_qnt AS extra_coupons,
+    aer.tax_from_source_qnt AS extra_tax,
+    aer.commission_from_source_qnt AS extra_commission,
+    aer.other_from_source_qnt AS extra_other
+
+    FROM asset_buy_sell_result ar
+    LEFT JOIN account_extra_result aer on (ar.account_uuid = aer.source_account_uuid)
+  ) remove_null_aggregation
+);
+
 COMMIT;
