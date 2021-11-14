@@ -96,108 +96,103 @@ CREATE TABLE "transaction" (
 );
 
 CREATE VIEW "asset_history" AS (
-SELECT
-transaction.uuid AS transaction_uuid, transaction.operation, event.type AS transaction_type, transaction.quantity,
-account.uuid AS account_uuid,
-asset.uuid AS asset_uuid, asset.ticker, asset.name, asset.description, asset.type AS asset_type,
-exchange_rate.uuid AS exchage_rate_uuid, exchange_rate.exchange_rate_value, exchange_rate.datetime, exchange_rate.asset_from_uuid, exchange_rate.asset_to_uuid
-FROM transaction
-LEFT JOIN event ON (transaction.event_uuid = event.uuid)
-LEFT JOIN account on (transaction.account_uuid = account.uuid)
-LEFT JOIN asset on (account.asset_uuid = asset.uuid)
-LEFT JOIN exchange_rate on (transaction.exchange_rate_uuid = exchange_rate.uuid)
+  SELECT
+  transaction.uuid AS transaction_uuid, transaction.operation, event.type AS transaction_type, transaction.quantity,
+  account.uuid AS account_uuid,
+  asset.uuid AS asset_uuid, asset.ticker, asset.name, asset.description, asset.type AS asset_type,
+  exchange_rate.uuid AS exchange_rate_uuid, exchange_rate.exchange_rate_value, exchange_rate.datetime,
+  exchange_rate.asset_from_uuid, exchange_rate.asset_to_uuid
+  FROM transaction
+  LEFT JOIN event ON (transaction.event_uuid = event.uuid)
+  LEFT JOIN account on (transaction.account_uuid = account.uuid)
+  LEFT JOIN asset on (account.asset_uuid = asset.uuid)
+  LEFT JOIN exchange_rate on (transaction.exchange_rate_uuid = exchange_rate.uuid)
 );
 
 CREATE VIEW "asset_rub" AS (
-SELECT
-uuid, type, ticker, name, description, created, updated
-FROM asset
-WHERE ticker = 'RUB'
-LIMIT 1
+  SELECT
+  uuid, type, ticker, name, description, created, updated
+  FROM asset
+  WHERE ticker = 'RUB'
+  LIMIT 1
 );
 
 -- SQL ANSI
 CREATE VIEW "exchange_rate_last2" AS (
-SELECT
-    er1.uuid, er1.asset_from_uuid, er1.asset_to_uuid, er1.datetime, er1.exchange_rate_value
-FROM exchange_rate er1
-LEFT JOIN exchange_rate er2 on (
+  SELECT
+  er1.uuid, er1.asset_from_uuid, er1.asset_to_uuid, er1.datetime, er1.exchange_rate_value
+  FROM exchange_rate er1
+  LEFT JOIN exchange_rate er2 on (
     er1.asset_from_uuid = er2.asset_from_uuid and er1.asset_to_uuid = er2.asset_to_uuid and er1.datetime < er2.datetime
-    )
-WHERE er2.uuid is NULL
+  )
+  WHERE er2.uuid is NULL
 );
 
 -- Postgres feature row_number() over()
 CREATE VIEW "exchange_rate_last" AS (
-SELECT
-er.uuid, er.datetime, er.asset_from_uuid, er.asset_to_uuid, er.exchange_rate_value
-FROM (
-SELECT
+  SELECT
+  er.uuid, er.datetime, er.asset_from_uuid, er.asset_to_uuid, er.exchange_rate_value
+  FROM (
+    SELECT
     ROW_NUMBER() OVER(PARTITION BY asset_from_uuid, asset_to_uuid ORDER BY datetime DESC) AS row_number, exchange_rate.*
-FROM exchange_rate
-) er
-WHERE er.row_number = 1
+    FROM exchange_rate
+  ) er
+  WHERE er.row_number = 1
 );
 
 -- TODO architecture: how to store big transaction table
--- TODO technical: get other type income/outcome sums (interest, tax and etc.)
-CREATE VIEW "asset_result" AS (
-SELECT
-*,
-remain_quantity * exchange_rate_value_current AS remain_value,
-earned_on_sell + remain_quantity * exchange_rate_value_current AS total_value,
-earned_on_sell + remain_quantity * exchange_rate_value_current - spent_on_buy AS absolute_margin,
-((earned_on_sell + remain_quantity * exchange_rate_value_current) / spent_on_buy - 1) * 100 AS percent_margin
+CREATE VIEW "asset_buy_sell_result" AS (
+  SELECT
+  *,
+  remain_quantity * exchange_rate_value_current AS remain_value,
+  earned_on_sell + remain_quantity * exchange_rate_value_current AS total_value,
+  earned_on_sell + remain_quantity * exchange_rate_value_current - spent_on_buy AS absolute_margin,
+  ((earned_on_sell + remain_quantity * exchange_rate_value_current) / spent_on_buy - 1) * 100 AS percent_margin
 
-FROM (
+  FROM (
+    SELECT
+    asset_uuid, asset_type, asset_name,
+    account_uuid,
+    buy_quantity, spent_on_buy,
+    (CASE WHEN sell_quantity IS NULL THEN 0 ELSE sell_quantity END) AS sell_quantity,
+    (CASE WHEN earned_on_sell IS NULL THEN 0 ELSE earned_on_sell END) AS earned_on_sell,
+    remain_quantity,
+    exchange_rate_value_current
 
-SELECT
-asset_uuid, asset_type, asset_name,
-account_uuid,
-buy_quantity, spent_on_buy,
-(CASE WHEN sell_quantity IS NULL THEN 0 ELSE sell_quantity END) AS sell_quantity,
-(CASE WHEN earned_on_sell IS NULL THEN 0 ELSE earned_on_sell END) AS earned_on_sell,
-remain_quantity,
-exchange_rate_value_current
+    FROM (
+      SELECT
+      asset_uuid, asset_type, asset_name,
+      account_uuid,
+      SUM(CASE WHEN event_type = 'buy' THEN transaction_quantity END) AS buy_quantity,
+      SUM(CASE WHEN event_type = 'sell' THEN transaction_quantity END) AS sell_quantity,
+      SUM(CASE
+        WHEN event_type = 'buy' THEN transaction_quantity
+        WHEN event_type = 'sell' THEN -transaction_quantity
+      END) AS remain_quantity,
+      exchange_rate_value_current,
+      SUM(CASE WHEN event_type = 'buy' THEN transaction_quantity * exchange_rate_value END) AS spent_on_buy,
+      SUM(CASE WHEN event_type = 'sell' THEN transaction_quantity * exchange_rate_value END) AS earned_on_sell
 
-FROM (
+      FROM (
+        SELECT
+        t.uuid AS transaction_uuid, t.operation AS transaction_operation, t.quantity AS transaction_quantity,
+        e.type AS event_type,
+        account.uuid AS account_uuid,
+        asset.uuid AS asset_uuid, asset.type AS asset_type, asset.name AS asset_name, asset.description AS asset_description,
+        erl.exchange_rate_value AS exchange_rate_value_current, erl.uuid AS exchange_rate_uuid, erl.asset_from_uuid AS exchange_rate_asset_from_uuid, erl.asset_to_uuid AS exchange_rate_asset_to_uuid,
+        er.exchange_rate_value AS exchange_rate_value
 
-SELECT
-asset_uuid, asset_type, asset_name,
-account_uuid,
-SUM(CASE WHEN event_type = 'buy' THEN transaction_quantity END) AS buy_quantity,
-SUM(CASE WHEN event_type = 'sell' THEN transaction_quantity END) AS sell_quantity,
-SUM(CASE
-  WHEN transaction_operation = 'income' THEN transaction_quantity
-  WHEN transaction_operation = 'outcome' THEN -transaction_quantity
-END) AS remain_quantity,
-
-exchange_rate_value_current,
-SUM(CASE WHEN event_type = 'buy' THEN transaction_quantity * exchange_rate_value END) AS spent_on_buy,
-SUM(CASE WHEN event_type = 'sell' THEN transaction_quantity * exchange_rate_value END) AS earned_on_sell
-
-FROM (
-
-SELECT
-t.uuid AS transaction_uuid, t.operation AS transaction_operation, t.quantity AS transaction_quantity,
-e.type AS event_type,
-account.uuid AS account_uuid,
-asset.uuid AS asset_uuid, asset.type AS asset_type, asset.name AS asset_name, asset.description AS asset_description,
-erl.exchange_rate_value AS exchange_rate_value_current, erl.uuid AS exchange_rate_uuid, erl.asset_from_uuid AS exchange_rate_asset_from_uuid, erl.asset_to_uuid AS exchange_rate_asset_to_uuid,
-er.exchange_rate_value AS exchange_rate_value
-FROM transaction t
-LEFT JOIN event e ON (t.event_uuid = e.uuid)
-LEFT JOIN account ON (t.account_uuid = account.uuid)
-LEFT JOIN asset ON (asset.uuid = account.asset_uuid)
-LEFT JOIN asset_rub ON (1=1)
-LEFT JOIN exchange_rate_last erl ON (erl.asset_from_uuid=account.asset_uuid AND erl.asset_to_uuid=asset_rub.uuid)
-LEFT JOIN exchange_rate er ON (t.exchange_rate_uuid = er.uuid)
-
-) quantity_aggregation
-GROUP BY asset_uuid, asset_type, asset_name, account_uuid, exchange_rate_value_current
-
-) remove_null_aggregation
-) sum_aggregation
+        FROM transaction t
+        LEFT JOIN event e ON (t.event_uuid = e.uuid)
+        LEFT JOIN account ON (t.account_uuid = account.uuid)
+        LEFT JOIN asset ON (asset.uuid = account.asset_uuid)
+        LEFT JOIN asset_rub ON (1=1)
+        LEFT JOIN exchange_rate_last erl ON (erl.asset_from_uuid=account.asset_uuid AND erl.asset_to_uuid=asset_rub.uuid)
+        LEFT JOIN exchange_rate er ON (t.exchange_rate_uuid = er.uuid)
+      ) quantity_aggregation
+      GROUP BY asset_uuid, asset_type, asset_name, account_uuid, exchange_rate_value_current
+    ) remove_null_aggregation
+  ) sum_aggregation
 );
 
 COMMIT;
