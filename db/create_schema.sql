@@ -104,9 +104,9 @@ CREATE VIEW "asset_history" AS (
   exchange_rate.asset_from_uuid, exchange_rate.asset_to_uuid
   FROM transaction
   LEFT JOIN event ON (transaction.event_uuid = event.uuid)
-  LEFT JOIN account on (transaction.account_uuid = account.uuid)
-  LEFT JOIN asset on (account.asset_uuid = asset.uuid)
-  LEFT JOIN exchange_rate on (transaction.exchange_rate_uuid = exchange_rate.uuid)
+  LEFT JOIN account ON (transaction.account_uuid = account.uuid)
+  LEFT JOIN asset ON (account.asset_uuid = asset.uuid)
+  LEFT JOIN exchange_rate ON (transaction.exchange_rate_uuid = exchange_rate.uuid)
 );
 
 CREATE VIEW "asset_rub" AS (
@@ -122,10 +122,10 @@ CREATE VIEW "exchange_rate_last2" AS (
   SELECT
   er1.uuid, er1.asset_from_uuid, er1.asset_to_uuid, er1.datetime, er1.exchange_rate_value
   FROM exchange_rate er1
-  LEFT JOIN exchange_rate er2 on (
+  LEFT JOIN exchange_rate er2 ON (
     er1.asset_from_uuid = er2.asset_from_uuid and er1.asset_to_uuid = er2.asset_to_uuid and er1.datetime < er2.datetime
   )
-  WHERE er2.uuid is NULL
+  WHERE er2.uuid IS NULL
 );
 
 -- Postgres feature row_number() over()
@@ -224,7 +224,7 @@ CREATE VIEW "account_extra_result" AS (
     END) AS total_result_qnt
 
     FROM transaction t
-    LEFT JOIN event e on (t.event_uuid = e.uuid)
+    LEFT JOIN event e ON (t.event_uuid = e.uuid)
     GROUP BY e.source_account_uuid
   ) remove_null_aggregation
 );
@@ -263,7 +263,7 @@ CREATE VIEW "asset_result" AS (
     aer.other_from_source_qnt AS extra_other
 
     FROM asset_buy_sell_result ar
-    LEFT JOIN account_extra_result aer on (ar.account_uuid = aer.source_account_uuid)
+    LEFT JOIN account_extra_result aer ON (ar.account_uuid = aer.source_account_uuid)
   ) remove_null_aggregation
 );
 
