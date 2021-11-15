@@ -154,8 +154,8 @@ CREATE VIEW "asset_buy_sell_result" AS (
     asset_uuid, asset_type, asset_name,
     account_uuid,
     buy_quantity, spent_on_buy,
-    (CASE WHEN sell_quantity IS NULL THEN 0 ELSE sell_quantity END) AS sell_quantity,
-    (CASE WHEN earned_on_sell IS NULL THEN 0 ELSE earned_on_sell END) AS earned_on_sell,
+    COALESCE(sell_quantity, 0) AS sell_quantity,
+    COALESCE(earned_on_sell, 0) AS earned_on_sell,
     remain_quantity,
     exchange_rate_value_current
 
@@ -200,13 +200,13 @@ CREATE VIEW "account_extra_result" AS (
   SELECT
   source_account_uuid,
   to_accounts,
-  (CASE WHEN interest_from_source_qnt IS NULL THEN 0 ELSE interest_from_source_qnt END) AS interest_from_source_qnt,
-  (CASE WHEN dividends_from_source_qnt IS NULL THEN 0 ELSE dividends_from_source_qnt END) AS dividends_from_source_qnt,
-  (CASE WHEN coupons_from_source_qnt IS NULL THEN 0 ELSE coupons_from_source_qnt END) AS coupons_from_source_qnt,
-  (CASE WHEN tax_from_source_qnt IS NULL THEN 0 ELSE tax_from_source_qnt END) AS tax_from_source_qnt,
-  (CASE WHEN commission_from_source_qnt IS NULL THEN 0 ELSE commission_from_source_qnt END) AS commission_from_source_qnt,
-  (CASE WHEN other_from_source_qnt IS NULL THEN 0 ELSE other_from_source_qnt END) AS other_from_source_qnt,
-  (CASE WHEN total_result_qnt IS NULL THEN 0 ELSE total_result_qnt END) AS total_result_qnt
+  COALESCE(interest_from_source_qnt, 0) AS interest_from_source_qnt,
+  COALESCE(dividends_from_source_qnt, 0) AS dividends_from_source_qnt,
+  COALESCE(coupons_from_source_qnt, 0) AS coupons_from_source_qnt,
+  COALESCE(tax_from_source_qnt, 0) AS tax_from_source_qnt,
+  COALESCE(commission_from_source_qnt, 0) AS commission_from_source_qnt,
+  COALESCE(other_from_source_qnt, 0) AS other_from_source_qnt,
+  COALESCE(total_result_qnt, 0) AS total_result_qnt
 
   FROM (
     SELECT
@@ -250,9 +250,9 @@ CREATE VIEW "asset_result" AS (
   FROM (
     SELECT
     ar.asset_uuid, ar.asset_type, ar.asset_name, ar.account_uuid,
-    ar.total_value as current_buy_sell_result,
-    CASE WHEN ar.absolute_margin IS NULL THEN 0 ELSE ar.absolute_margin END as sell_result,
-    CASE WHEN aer.total_result_qnt IS NULL THEN 0 ELSE aer.total_result_qnt END as extra_result,
+    ar.total_value AS current_buy_sell_result,
+    COALESCE(ar.absolute_margin, 0) AS sell_result,
+    COALESCE(aer.total_result_qnt, 0) AS extra_result,
     ar.buy_quantity, ar.spent_on_buy, ar.sell_quantity, ar.earned_on_sell,
     ar.remain_quantity, ar.exchange_rate_value_current, ar.remain_value,
     aer.interest_from_source_qnt AS extra_interest,
