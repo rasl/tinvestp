@@ -1,6 +1,5 @@
 # Track investing profile (tinvestp)
 
-
 ## Intro
 
 Features:
@@ -15,7 +14,7 @@ Run:
 ```shell
 $ cp .env.template .env
 $ docker-compose up -d
-$ cat db/create_database.sql| docker-compose exec -T db psql --user postgres; cat db/create_schema.sql| docker-compose exec -T db psql --user postgres -d investing
+$ cat db/create_schema.sql| docker-compose exec -T db psql --user postgres -d investing
 ```
 
 go to [http://[::]:8080 "adminer"](http://[::]:8080)
@@ -26,4 +25,9 @@ Stop and clean:
 ```shell
 $ docker-compose down
 $ rm -rf data/postgres
+```
+
+Reinstall:
+```shell
+$ ./full_reinstall.sh
 ```
