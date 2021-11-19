@@ -27,7 +27,7 @@ $ docker-compose down
 $ rm -rf data/postgres
 ```
 
-Reinstall:
+Stop, clean and rerun:
 ```shell
 $ ./full_reinstall.sh
 ```
