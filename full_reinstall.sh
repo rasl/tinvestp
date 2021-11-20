@@ -10,5 +10,5 @@ until docker-compose exec db psql --user $POSTGRES_USER -d postgres -c "select 1
     sleep 1
 done
 
-cat db/create_schema.sql| docker-compose exec -T db psql --user $POSTGRES_USER -d $POSTGRES_DB
-cat db/test_data.sql| docker-compose exec -T db psql --user $POSTGRES_USER -d $POSTGRES_DB
+docker-compose exec -T db psql --user $POSTGRES_USER -d $POSTGRES_DB < db/create_schema.sql
+docker-compose exec -T db psql --user $POSTGRES_USER -d $POSTGRES_DB < db/test_data.sql
