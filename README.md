@@ -14,7 +14,7 @@ Run:
 ```shell
 $ cp .env.template .env
 $ docker-compose up -d
-$ cat db/create_schema.sql| docker-compose exec -T db psql --user postgres -d investing
+$ cat db/create_schema.sql| docker-compose exec -T db psql --user investing -d investing
 ```
 
 go to [http://[::]:8080 "adminer"](http://[::]:8080)
