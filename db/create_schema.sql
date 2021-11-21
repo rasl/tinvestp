@@ -1,13 +1,15 @@
 BEGIN;
 
 CREATE TYPE "asset_type" AS ENUM (
-  'bond', 'stock', 'deposit', 'currency', 'cash', 'value', 'bank account', 'other'
+  'bond', 'stock', 'eft', 'deposit', 'currency', 'cash', 'value', 'bank account', 'other'
 );
 
 CREATE TABLE "asset" (
   "uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   "type" asset_type NOT NULL,
   "ticker" text NOT NULL,
+  "figi" text NULL,
+  "isin" text NULL,
   "name" text NULL,
   "description" text NULL,
   "created" timestamptz NULL,
