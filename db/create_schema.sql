@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE TYPE "asset_type" AS ENUM (
-  'bond', 'stock', 'eft', 'deposit', 'currency', 'cash', 'value', 'bank account', 'other'
+  'bond', 'stock', 'etf', 'deposit', 'currency', 'cash', 'value', 'bank account', 'other'
 );
 
 CREATE TABLE "asset" (
