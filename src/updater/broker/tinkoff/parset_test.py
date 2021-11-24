@@ -1,28 +1,39 @@
 import pytest
-from updater.broker.tinkoff.parser import parse_asset
+from updater.broker.tinkoff.parser import parse_asset, get_asset_type_from_broker_type
 
+
+@pytest.mark.parametrize(
+    'input, expected_result',
+    [
+        ('Bond', 'bond'),
+        ('Stock', 'stock'),
+        ('Etf', 'etf'),
+        ('unknown', 'other'),
+    ]
+)
+def test_get_asset_type_from_broker_type(input: str, expected_result: str) -> None:
+    assert get_asset_type_from_broker_type(input) == expected_result
 
 @pytest.mark.parametrize(
     'input, expected_result',
     [
         (
             {
-                "figi": "BBG00T22WKV5",
-                "ticker": "SU29013RMFS8",
-                "isin": "RU000A101KT1",
+                "figi": "BBG004730JJ5",
+                "ticker": "MOEX",
+                "isin": "RU000A0JR4A1",
                 "minPriceIncrement": 0.01,
-                "faceValue": 1E+3,
-                "lot": 1,
+                "lot": 10,
                 "currency": "RUB",
-                "name": "ОФЗ 29013",
-                "type": "Bond"
+                "name": "Московская Биржа",
+                "type": "Stock"
             },
             {
-                'asset_type': 'bond',
-                'ticker': 'SU29013RMFS8',
-                'figi': 'BBG00T22WKV5',
-                'isin': 'RU000A101KT1',
-                'name': 'ОФЗ 29013',
+                'asset_type': 'stock',
+                'ticker': 'MOEX',
+                'figi': 'BBG004730JJ5',
+                'isin': 'RU000A0JR4A1',
+                'name': 'Московская Биржа',
                 'description': None,
             }
         )

@@ -2,10 +2,15 @@ import json
 import uuid
 
 
-def parse_asset(broker_item: dict) -> dict:
-    asset_type = str(broker_item['type']).lower()
+def get_asset_type_from_broker_type(broker_asset_type: str) -> str:
+    asset_type = str(broker_asset_type).lower()
     if asset_type not in ['bond', 'stock', 'etf', 'deposit', 'currency', 'cash', 'value', 'bank account', 'other']:
         asset_type = 'other'
+    return asset_type
+
+
+def parse_asset(broker_item: dict) -> dict:
+    asset_type = get_asset_type_from_broker_type(broker_item['type'])
     return {
         'uuid': str(uuid.uuid4()),
         'asset_type': asset_type,
