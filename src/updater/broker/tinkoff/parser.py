@@ -2,11 +2,16 @@ import json
 import uuid
 
 
-def get_asset_type_from_broker_type(broker_asset_type: str) -> str:
-    asset_type = str(broker_asset_type).lower()
-    if asset_type not in ['bond', 'stock', 'etf', 'deposit', 'currency', 'cash', 'value', 'bank account', 'other']:
-        asset_type = 'other'
-    return asset_type
+def get_asset_type_from_broker_type(broker_asset_type: str) -> str | None:
+    broker_asset_types_map = {
+        'Bond': 'bond',
+        'Stock': 'stock',
+        'Etf': 'etf',
+        'Currency': 'currency'
+    }
+    if broker_asset_type not in broker_asset_types_map:
+        return None
+    return broker_asset_types_map[broker_asset_type]
 
 
 def parse_asset(broker_item: dict) -> dict:
@@ -42,14 +47,38 @@ def parse_assets(json_data: json) -> (dict, dict):
     return assets, accounts
 
 
+def get_transaction_type_from_broker_operation_type(broker_operation_type: str) -> str | None:
+    broker_operation_types_map = {
+        'Buy': 'outcome',
+        'BuyCard': 'outcome',
+        'Sell': 'income',
+        'BrokerCommission': 'outcome',
+        'ExchangeCommission': 'outcome',
+        'ServiceCommission': 'outcome',
+        'MarginCommission': 'outcome',
+        'OtherCommission': 'outcome',
+        'PayIn': 'income',
+        'PayOut': 'outcome',
+        'Tax': 'outcome',
+        'TaxLucre': 'outcome',
+        'TaxDividend': 'outcome',
+        'TaxCoupon': 'outcome',
+        'TaxBack': 'outcome',
+        'Repayment': 'outcome',
+        'PartRepayment': 'income',
+        'Coupon': 'income',
+        'Dividend': 'income',
+        'SecurityIn': 'income',
+        'SecurityOut': 'outcome'
+    }
+    if broker_operation_type not in broker_operation_types_map:
+        return None
+    return broker_operation_types_map[broker_operation_type]
+
+
 # TODO technical: unit tests
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
-    transaction_type = None
-    if broker_operation['operationType'] in ['Coupon', 'PartRepayment', 'PayIn', 'Dividend']:
-        transaction_type = 'income'
-    if broker_operation['operationType'] in ['BrokerCommission', 'Buy', 'ServiceCommission', 'TaxDividend']:
-        transaction_type = 'outcome'
-
+    transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event = {
         'uuid': str(uuid.uuid4()),
         'type': 'buy',  # 'sell', 'buy', 'interest', 'dividends', 'coupons', 'tax', 'commission', 'other'

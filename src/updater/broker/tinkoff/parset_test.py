@@ -8,7 +8,7 @@ from updater.broker.tinkoff.parser import parse_asset, get_asset_type_from_broke
         ('Bond', 'bond'),
         ('Stock', 'stock'),
         ('Etf', 'etf'),
-        ('unknown', 'other'),
+        ('unknown', None),
     ]
 )
 def test_get_asset_type_from_broker_type(input: str, expected_result: str) -> None:
