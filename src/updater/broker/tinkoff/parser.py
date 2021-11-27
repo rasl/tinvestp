@@ -76,12 +76,42 @@ def get_transaction_type_from_broker_operation_type(broker_operation_type: str) 
     return broker_operation_types_map[broker_operation_type]
 
 
+def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str | None:
+    broker_operation_types_map = {
+        'Buy': 'buy',
+        'BuyCard': 'buy',
+        'Sell': 'sell',
+        'BrokerCommission': 'commission',
+        'ExchangeCommission': 'commission',
+        'ServiceCommission': 'commission',
+        'MarginCommission': 'commission',
+        'OtherCommission': 'commission',
+        'PayIn': 'interest',
+        'PayOut': 'other',
+        'Tax': 'tax',
+        'TaxLucre': 'tax',
+        'TaxDividend': 'tax',
+        'TaxCoupon': 'tax',
+        'TaxBack': 'tax',
+        'Repayment': 'other',
+        'PartRepayment': 'other',
+        'Coupon': 'coupons',
+        'Dividend': 'dividends',
+        'SecurityIn': 'other',
+        'SecurityOut': 'other'
+    }
+    if broker_operation_type not in broker_operation_types_map:
+        return None
+    return broker_operation_types_map[broker_operation_type]
+
+
 # TODO technical: unit tests
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
+    event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
     event = {
         'uuid': str(uuid.uuid4()),
-        'type': 'buy',  # 'sell', 'buy', 'interest', 'dividends', 'coupons', 'tax', 'commission', 'other'
+        'type': event_type,
         'description': '',
         'source_account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111'
     }
