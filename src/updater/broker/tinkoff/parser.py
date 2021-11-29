@@ -107,6 +107,13 @@ def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str
 
 # TODO technical: unit tests
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
+    if broker_operation['operationType'] == 'Buy':
+        return parse_transaction_buy(broker_operation, assets, accounts)
+    # TODO custom exception
+    raise Exception('Unexpected operation type=[' + broker_operation['operationType'] + ']')
+
+
+def parse_transaction_buy(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
     event = {
@@ -128,7 +135,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         'uuid': str(uuid.uuid4()),
         'operation': transaction_type,
         'event_uuid': event['uuid'],
-        'account_id': accounts[broker_operation['figi']]['uuid'],
+        'account_uuid': accounts[broker_operation['figi']]['uuid'],
         'quantity': broker_operation['quantity'],
         'datetime': broker_operation['date'],
         'exchange_rate_uuid': exchange_rate['uuid'],

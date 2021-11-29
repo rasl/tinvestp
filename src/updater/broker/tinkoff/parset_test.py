@@ -1,5 +1,5 @@
 import pytest
-from updater.broker.tinkoff.parser import parse_asset, get_asset_type_from_broker_type
+from updater.broker.tinkoff.parser import parse_asset, get_asset_type_from_broker_type, parse_transaction
 
 
 @pytest.mark.parametrize(
@@ -13,6 +13,7 @@ from updater.broker.tinkoff.parser import parse_asset, get_asset_type_from_broke
 )
 def test_get_asset_type_from_broker_type(input: str, expected_result: str) -> None:
     assert get_asset_type_from_broker_type(input) == expected_result
+
 
 @pytest.mark.parametrize(
     'input, expected_result',
@@ -45,3 +46,66 @@ def test_parse_asset(input: dict, expected_result: dict) -> None:
     del actual_result['created']
     del actual_result['updated']
     assert actual_result == expected_result
+
+
+def test_parse_buy_transaction() -> None:
+    input_broker_operation = {
+        "operationType": "Buy",
+        "date": "2021-11-10T21:01:07.79+03:00",
+        "isMarginCall": False,
+        "instrumentType": "Stock",
+        "figi": "BBG004S68829",
+        "quantity": 1,
+        "quantityExecuted": 1,
+        "price": 494,
+        "payment": -494,
+        "currency": "RUB",
+        "commission": {
+            "currency": "RUB",
+            "value": -0.2
+        },
+        "trades": [
+            {
+                "tradeId": "4617352039",
+                "date": "2021-11-10T21:01:07.79+03:00",
+                "quantity": 1,
+                "price": 494
+            }
+        ],
+        "status": "Done",
+        "id": "27191692220"
+    }
+    input_broker_assets = {
+        "BBG004S68829": {
+            "uuid": '00000000-0000-0000-0000-000000000000'
+        }
+    }
+    input_broker_accounts = {
+        "BBG004S68829": {
+            "uuid": '11111111-1111-1111-1111-111111111111'
+        }
+    }
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'outcome',
+        'event_uuid': event['uuid'],
+        'account_uuid': '11111111-1111-1111-1111-111111111111',
+        'quantity': 1,
+        'datetime': "2021-11-10T21:01:07.79+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-11-10T21:01:07.79+03:00",
+        'asset_from_uuid': '00000000-0000-0000-0000-000000000000',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value': 494,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'buy',
+        'description': '',
+        'source_account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111'
+    }
