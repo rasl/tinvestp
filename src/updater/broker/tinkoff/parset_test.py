@@ -160,3 +160,50 @@ def test_parse_transaction_broker_commission() -> None:
         'source_account_uuid': '11111111-1111-1111-1111-111111111111',
     }
 
+
+def test_parse_transaction_coupon() -> None:
+    input_broker_operation = {
+        "operationType": "Coupon",
+        "date": "2021-11-15T06:00:00+03:00",
+        "isMarginCall": False,
+        "instrumentType": "Bond",
+        "figi": "BBG00RP6D594",
+        "payment": 27.42,
+        "currency": "RUB",
+        "status": "Done",
+        "id": "1891186745"
+    }
+    input_broker_assets = {
+        "BBG00RP6D594": {
+            "uuid": '00000000-0000-0000-0000-000000000000'
+        }
+    }
+    input_broker_accounts = {
+        "BBG00RP6D594": {
+            "uuid": '11111111-1111-1111-1111-111111111111'
+        }
+    }
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'income',
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': 27.42,
+        'datetime': "2021-11-15T06:00:00+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-11-15T06:00:00+03:00",
+        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value': 1,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'coupons',
+        'description': '',
+        'source_account_uuid': '11111111-1111-1111-1111-111111111111',
+    }
