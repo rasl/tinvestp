@@ -48,7 +48,7 @@ def test_parse_asset(input: dict, expected_result: dict) -> None:
     assert actual_result == expected_result
 
 
-def test_parse_buy_transaction() -> None:
+def test_parse_transaction_buy() -> None:
     input_broker_operation = {
         "operationType": "Buy",
         "date": "2021-11-10T21:01:07.79+03:00",
@@ -109,3 +109,54 @@ def test_parse_buy_transaction() -> None:
         'description': '',
         'source_account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111'
     }
+
+
+def test_parse_transaction_broker_commission() -> None:
+    input_broker_operation = {
+        "operationType": "BrokerCommission",
+        "date": "2021-11-10T21:01:08.79+03:00",
+        "isMarginCall": False,
+        "instrumentType": "Stock",
+        "figi": "BBG004S68829",
+        "quantity": 0,
+        "quantityExecuted": 0,
+        "payment": -0.2,
+        "currency": "RUB",
+        "status": "Done",
+        "id": "1876311927"
+      }
+    input_broker_assets = {
+        "BBG004S68829": {
+            "uuid": '00000000-0000-0000-0000-000000000000'
+        }
+    }
+    input_broker_accounts = {
+        "BBG004S68829": {
+            "uuid": '11111111-1111-1111-1111-111111111111'
+        }
+    }
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'outcome',
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': 0.2,
+        'datetime': "2021-11-10T21:01:08.79+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-11-10T21:01:08.79+03:00",
+        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value': 1,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'commission',
+        'description': '',
+        'source_account_uuid': '11111111-1111-1111-1111-111111111111',
+    }
+
