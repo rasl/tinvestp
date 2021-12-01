@@ -207,3 +207,147 @@ def test_parse_transaction_coupon() -> None:
         'description': '',
         'source_account_uuid': '11111111-1111-1111-1111-111111111111',
     }
+
+
+def test_parse_transaction_part_repayment() -> None:
+    input_broker_operation = {
+        "operationType": "PartRepayment",
+        "date": "2021-11-15T06:00:00+03:00",
+        "isMarginCall": False,
+        "instrumentType": "Bond",
+        "figi": "BBG00HZ418L3",
+        "payment": 3E+2,
+        "currency": "RUB",
+        "status": "Done",
+        "id": "1891182668"
+      }
+    input_broker_assets = {
+        "BBG00HZ418L3": {
+            "uuid": '00000000-0000-0000-0000-000000000000'
+        }
+    }
+    input_broker_accounts = {
+        "BBG00HZ418L3": {
+            "uuid": '11111111-1111-1111-1111-111111111111'
+        }
+    }
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'income',
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': 3E+2,
+        'datetime': "2021-11-15T06:00:00+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-11-15T06:00:00+03:00",
+        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value': 1,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'other',
+        'description': '',
+        'source_account_uuid': '11111111-1111-1111-1111-111111111111',
+    }
+
+
+def test_parse_transaction_dividend() -> None:
+    input_broker_operation = {
+        "operationType": "Dividend",
+        "date": "2021-11-05T06:00:00+03:00",
+        "isMarginCall": False,
+        "instrumentType": "Stock",
+        "figi": "BBG004S68B31",
+        "payment": 263.7,
+        "currency": "RUB",
+        "status": "Done",
+        "id": "1841616089"
+      }
+    input_broker_assets = {
+        "BBG004S68B31": {
+            "uuid": '00000000-0000-0000-0000-000000000000'
+        }
+    }
+    input_broker_accounts = {
+        "BBG004S68B31": {
+            "uuid": '11111111-1111-1111-1111-111111111111'
+        }
+    }
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'income',
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': 263.7,
+        'datetime': "2021-11-05T06:00:00+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-11-05T06:00:00+03:00",
+        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value': 1,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'dividends',
+        'description': '',
+        'source_account_uuid': '11111111-1111-1111-1111-111111111111',
+    }
+
+
+def test_parse_transaction_tax_dividend() -> None:
+        input_broker_operation = {
+            "operationType": "TaxDividend",
+            "date": "2021-11-05T06:00:00+03:00",
+            "isMarginCall": False,
+            "instrumentType": "Stock",
+            "figi": "BBG004S68B31",
+            "payment": -32,
+            "currency": "RUB",
+            "status": "Done",
+            "id": "1841615748"
+        }
+        input_broker_assets = {
+            "BBG004S68B31": {
+                "uuid": '00000000-0000-0000-0000-000000000000'
+            }
+        }
+        input_broker_accounts = {
+            "BBG004S68B31": {
+                "uuid": '11111111-1111-1111-1111-111111111111'
+            }
+        }
+        transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                              input_broker_accounts)
+        del transaction['uuid']
+        assert transaction == {
+            'operation': 'outcome',
+            'event_uuid': event['uuid'],
+            'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+            'quantity': 32,
+            'datetime': "2021-11-05T06:00:00+03:00",
+            'exchange_rate_uuid': exchange_rate['uuid'],
+        }
+        del exchange_rate['uuid']
+        assert exchange_rate == {
+            'datetime': "2021-11-05T06:00:00+03:00",
+            'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',
+            'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+            'exchange_rate_value': 1,
+        }
+        del event['uuid']
+        assert event == {
+            'type': 'tax',
+            'description': '',
+            'source_account_uuid': '11111111-1111-1111-1111-111111111111',
+        }
