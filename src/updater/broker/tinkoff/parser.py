@@ -119,6 +119,8 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         return parse_transaction_additional_with_source(broker_operation, assets, accounts)
     if broker_operation['operationType'] == 'TaxDividend':
         return parse_transaction_additional_with_source(broker_operation, assets, accounts)
+    if broker_operation['operationType'] == 'ServiceCommission':
+        return parse_transaction_additional_without_source(broker_operation)
 
     # TODO custom exception
     raise Exception('Unexpected operation type=[' + broker_operation['operationType'] + ']')
@@ -163,6 +165,37 @@ def parse_transaction_additional_with_source(broker_operation: dict, assets: dic
         'type': event_type,
         'description': '',
         'source_account_uuid': accounts[broker_operation['figi']]['uuid']
+    }
+
+    exchange_rate = {
+        'uuid': str(uuid.uuid4()),
+        'datetime': broker_operation['date'],
+        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc', # TODO tech: remove hardcode it's the bank account
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
+        'exchange_rate_value': 1, # TODO tech: remove hardcode it's currency RUB asset
+    }
+
+    transaction = {
+        'uuid': str(uuid.uuid4()),
+        'operation': transaction_type,
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': abs(broker_operation['payment']),
+        'datetime': broker_operation['date'],
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    return transaction, exchange_rate, event
+
+
+def parse_transaction_additional_without_source(broker_operation: dict) -> (dict, dict, dict):
+    # TODO architecture: here need fixed exchange currency rate
+    transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
+    event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
+    event = {
+        'uuid': str(uuid.uuid4()),
+        'type': event_type,
+        'description': '',
+        'source_account_uuid': None
     }
 
     exchange_rate = {
