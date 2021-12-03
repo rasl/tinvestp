@@ -389,3 +389,41 @@ def test_parse_transaction_service_commission() -> None:
         'description': '',
         'source_account_uuid': None,
     }
+
+
+def test_parse_transaction_pay_in() -> None:
+    input_broker_operation = {
+        "operationType": "PayIn",
+        "date": "2021-11-10T20:29:09+03:00",
+        "isMarginCall": False,
+        "payment": 869.72,
+        "currency": "RUB",
+        "status": "Done",
+        "id": "1876201873"
+      }
+    input_broker_assets = {}
+    input_broker_accounts = {}
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'income',
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': 869.72,
+        'datetime': "2021-11-10T20:29:09+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-11-10T20:29:09+03:00",
+        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value': 1,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'other',
+        'description': '',
+        'source_account_uuid': None,
+    }

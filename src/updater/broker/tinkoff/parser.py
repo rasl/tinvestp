@@ -86,7 +86,7 @@ def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str
         'ServiceCommission': 'commission',
         'MarginCommission': 'commission',
         'OtherCommission': 'commission',
-        'PayIn': 'interest',
+        'PayIn': 'other',
         'PayOut': 'other',
         'Tax': 'tax',
         'TaxLucre': 'tax',
@@ -120,6 +120,8 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
     if broker_operation['operationType'] == 'TaxDividend':
         return parse_transaction_additional_with_source(broker_operation, assets, accounts)
     if broker_operation['operationType'] == 'ServiceCommission':
+        return parse_transaction_additional_without_source(broker_operation)
+    if broker_operation['operationType'] == 'PayIn':
         return parse_transaction_additional_without_source(broker_operation)
 
     # TODO custom exception
