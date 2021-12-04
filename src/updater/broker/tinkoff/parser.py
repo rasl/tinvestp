@@ -36,7 +36,6 @@ def create_account_for_asset(asset_uuid: str) -> dict:
     }
 
 
-# TODO technical: unit tests
 def parse_assets(json_data: json) -> (dict, dict):
     assets = {}
     accounts = {}
@@ -105,7 +104,6 @@ def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str
     return broker_operation_types_map[broker_operation_type]
 
 
-# TODO technical: unit tests
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
     if broker_operation['operationType'] == 'Buy':
         return parse_transaction_buy(broker_operation, assets, accounts)
@@ -225,8 +223,6 @@ def parse_transactions(json_data: json, assets: dict, accounts: dict) -> (dict, 
     exchange_rates = {}
     transactions = {}
     for broker_transaction in json_data['payload']['operations']:
-        if broker_transaction['operationType'] != 'Buy':  # TODO technical: other types
-            continue
         parsed_transaction, er, e = parse_transaction(broker_transaction, assets, accounts)
         transactions[broker_transaction['id']] = parsed_transaction
         exchange_rates[broker_transaction['id']] = er
