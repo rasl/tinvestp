@@ -42,7 +42,7 @@ def parse_assets(json_data: json) -> (dict, dict):
     for broker_asset in json_data['payload']['instruments']:
         parsed_asset = parse_asset(broker_asset)
         assets[parsed_asset['figi']] = parsed_asset
-        accounts[parsed_asset['figi']] = create_account_for_asset(parsed_asset[parsed_asset['figi']]['uuid'])
+        accounts[parsed_asset['figi']] = create_account_for_asset(parsed_asset['uuid'])
     return assets, accounts
 
 
