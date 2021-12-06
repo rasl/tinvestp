@@ -94,8 +94,8 @@ def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str
         'TaxBack': 'tax',
         'Repayment': 'other',
         'PartRepayment': 'other',
-        'Coupon': 'coupons',
-        'Dividend': 'dividends',
+        'Coupon': 'coupon',
+        'Dividend': 'dividend',
         'SecurityIn': 'other',
         'SecurityOut': 'other'
     }

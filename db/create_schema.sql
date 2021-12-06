@@ -70,7 +70,7 @@ CREATE TABLE "exchange_rate" (
 );
 
 CREATE TYPE "event_type" AS ENUM (
-  'sell', 'buy', 'interest', 'dividends', 'coupons', 'tax', 'commission', 'other'
+  'sell', 'buy', 'interest', 'dividend', 'coupon', 'tax', 'commission', 'other'
 );
 
 CREATE TABLE "event" (
@@ -224,8 +224,8 @@ CREATE VIEW "account_extra_result" AS (
   source_account_uuid,
   to_accounts,
   COALESCE(interest_from_source_qnt, 0) AS interest_from_source_qnt,
-  COALESCE(dividends_from_source_qnt, 0) AS dividends_from_source_qnt,
-  COALESCE(coupons_from_source_qnt, 0) AS coupons_from_source_qnt,
+  COALESCE(dividend_from_source_qnt, 0) AS dividend_from_source_qnt,
+  COALESCE(coupon_from_source_qnt, 0) AS coupon_from_source_qnt,
   COALESCE(tax_from_source_qnt, 0) AS tax_from_source_qnt,
   COALESCE(commission_from_source_qnt, 0) AS commission_from_source_qnt,
   COALESCE(other_from_source_qnt, 0) AS other_from_source_qnt,
@@ -236,8 +236,8 @@ CREATE VIEW "account_extra_result" AS (
     e.source_account_uuid,
     array_agg(t.account_uuid) to_accounts,
     SUM(CASE WHEN e.type = 'interest' THEN t.quantity END) AS interest_from_source_qnt,
-    SUM(CASE WHEN e.type = 'dividends' THEN t.quantity END) AS dividends_from_source_qnt,
-    SUM(CASE WHEN e.type = 'coupons' THEN t.quantity END) AS coupons_from_source_qnt,
+    SUM(CASE WHEN e.type = 'dividend' THEN t.quantity END) AS dividend_from_source_qnt,
+    SUM(CASE WHEN e.type = 'coupon' THEN t.quantity END) AS coupon_from_source_qnt,
     SUM(CASE WHEN e.type = 'tax' THEN t.quantity END) AS tax_from_source_qnt,
     SUM(CASE WHEN e.type = 'commission' THEN t.quantity END) AS commission_from_source_qnt,
     SUM(CASE WHEN e.type = 'other' THEN t.quantity END) AS other_from_source_qnt,
@@ -273,8 +273,8 @@ CREATE VIEW "asset_result" AS (
   exchange_rate_value_current,
   remain_value,
   extra_interest,
-  extra_dividends,
-  extra_coupons,
+  extra_dividend,
+  extra_coupon,
   extra_tax,
   extra_commission,
   extra_other
@@ -296,8 +296,8 @@ CREATE VIEW "asset_result" AS (
     ar.exchange_rate_value_current,
     ar.remain_value,
     aer.interest_from_source_qnt AS extra_interest,
-    aer.dividends_from_source_qnt AS extra_dividends,
-    aer.coupons_from_source_qnt AS extra_coupons,
+    aer.dividend_from_source_qnt AS extra_dividend,
+    aer.coupon_from_source_qnt AS extra_coupon,
     aer.tax_from_source_qnt AS extra_tax,
     aer.commission_from_source_qnt AS extra_commission,
     aer.other_from_source_qnt AS extra_other

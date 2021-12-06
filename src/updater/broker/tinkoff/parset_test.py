@@ -203,7 +203,7 @@ def test_parse_transaction_coupon() -> None:
     }
     del event['uuid']
     assert event == {
-        'type': 'coupons',
+        'type': 'coupon',
         'description': '',
         'source_account_uuid': '11111111-1111-1111-1111-111111111111',
     }
@@ -299,7 +299,7 @@ def test_parse_transaction_dividend() -> None:
     }
     del event['uuid']
     assert event == {
-        'type': 'dividends',
+        'type': 'dividend',
         'description': '',
         'source_account_uuid': '11111111-1111-1111-1111-111111111111',
     }

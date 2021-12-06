@@ -39,7 +39,7 @@ INSERT INTO "event" ("uuid", "type", "description", "source_account_uuid") VALUE
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f73',	'buy',	'buy bonds',	'8d8fde97-d609-4d0f-bed5-73d1a91d1111'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f74',	'sell',	'sell bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f75',	'sell',	'sell bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
-('cb8d4406-2c7a-4a39-92cc-466fc3423f81',	'coupons',	'coupons bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f81',	'coupon',	'coupon bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f82',	'commission',	'commission bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f83',	'tax',	'tax bonds',	'8b8777e6-0e9d-47a2-b6f8-7b3b8919eeef'),
 
@@ -47,7 +47,7 @@ INSERT INTO "event" ("uuid", "type", "description", "source_account_uuid") VALUE
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f76',	'buy',	'buy stock: sber',	'8d8fde97-d609-4d0f-bed5-73d1a91d1111'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423777',	'sell',	'sell stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f77',	'sell',	'sell stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
-('cb8d4406-2c7a-4a39-92cc-466fc3423f78',	'dividends',	'dividends stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
+('cb8d4406-2c7a-4a39-92cc-466fc3423f78',	'dividend',	'dividend stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f79',	'commission',	'commission stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9'),
 ('cb8d4406-2c7a-4a39-92cc-466fc3423f80',	'tax',	'tax stock: sber',	'6fe60719-1501-4149-9c87-197c7307fdb9');
 
