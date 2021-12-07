@@ -126,33 +126,62 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
     raise Exception('Unexpected operation type=[' + broker_operation['operationType'] + ']')
 
 
-def parse_transaction_buy(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
-    transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
-    event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
+def create_event(event_type: str, source_account_uuid: str | None):
     event = {
         'uuid': str(uuid.uuid4()),
         'type': event_type,
         'description': '',
-        'source_account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111'  # TODO tech: remove hardcode it's the bank account
+        'source_account_uuid': source_account_uuid,
     }
+    return event
 
+
+def create_exchange_rate(datetime: str, asset_from_uuid: str, asset_to_uuid: str, exchange_rate_value: int):
     exchange_rate = {
         'uuid': str(uuid.uuid4()),
-        'datetime': broker_operation['date'],
-        'asset_from_uuid': assets[broker_operation['figi']]['uuid'],
-        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
-        'exchange_rate_value': broker_operation['price'],
+        'datetime': datetime,
+        'asset_from_uuid': asset_from_uuid,
+        'asset_to_uuid': asset_to_uuid,
+        'exchange_rate_value': exchange_rate_value,
     }
+    return exchange_rate
 
+
+def create_transaction(transaction_type: str, event_uuid: str, account_uuid: str, quantity: int, datetime: str, exchange_rate_uuid: str):
     transaction = {
         'uuid': str(uuid.uuid4()),
         'operation': transaction_type,
-        'event_uuid': event['uuid'],
-        'account_uuid': accounts[broker_operation['figi']]['uuid'],
-        'quantity': broker_operation['quantity'],
-        'datetime': broker_operation['date'],
-        'exchange_rate_uuid': exchange_rate['uuid'],
+        'event_uuid': event_uuid,
+        'account_uuid': account_uuid,
+        'quantity': quantity,
+        'datetime': datetime,
+        'exchange_rate_uuid': exchange_rate_uuid,
     }
+    return transaction
+
+
+def parse_transaction_buy(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
+    transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
+    event = create_event(
+        event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
+        source_account_uuid='8d8fde97-d609-4d0f-bed5-73d1a91d1111'  # TODO tech: remove hardcode it's the bank account
+    )
+
+    exchange_rate = create_exchange_rate(
+        datetime=broker_operation['date'],
+        asset_from_uuid=assets[broker_operation['figi']]['uuid'],
+        asset_to_uuid='2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
+        exchange_rate_value=broker_operation['price']
+    )
+
+    transaction = create_transaction(
+        transaction_type=transaction_type,
+        event_uuid=event['uuid'],
+        account_uuid=accounts[broker_operation['figi']]['uuid'],
+        quantity=broker_operation['quantity'],
+        datetime=broker_operation['date'],
+        exchange_rate_uuid=exchange_rate['uuid']
+    )
     return transaction, exchange_rate, event
 
 
@@ -160,61 +189,52 @@ def parse_transaction_additional_with_source(broker_operation: dict, assets: dic
     # TODO architecture: here need fixed exchange currency rate
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
-    event = {
-        'uuid': str(uuid.uuid4()),
-        'type': event_type,
-        'description': '',
-        'source_account_uuid': accounts[broker_operation['figi']]['uuid']
-    }
+    event = create_event(
+        event_type=event_type,
+        source_account_uuid=accounts[broker_operation['figi']]['uuid']
+    )
 
-    exchange_rate = {
-        'uuid': str(uuid.uuid4()),
-        'datetime': broker_operation['date'],
-        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc', # TODO tech: remove hardcode it's the bank account
-        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
-        'exchange_rate_value': 1, # TODO tech: remove hardcode it's currency RUB asset
-    }
+    exchange_rate = create_exchange_rate(
+        datetime=broker_operation['date'],
+        asset_from_uuid='2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',  # TODO tech: remove hardcode it's the bank account
+        asset_to_uuid='2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
+        exchange_rate_value=1  # TODO tech: remove hardcode it's currency RUB asset
+    )
 
-    transaction = {
-        'uuid': str(uuid.uuid4()),
-        'operation': transaction_type,
-        'event_uuid': event['uuid'],
-        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
-        'quantity': abs(broker_operation['payment']),
-        'datetime': broker_operation['date'],
-        'exchange_rate_uuid': exchange_rate['uuid'],
-    }
+    transaction = create_transaction(
+        transaction_type=transaction_type,
+        event_uuid=event['uuid'],
+        account_uuid='8d8fde97-d609-4d0f-bed5-73d1a91d1111',  # TODO tech: remove hardcode account
+        quantity=abs(broker_operation['payment']),
+        datetime=broker_operation['date'],
+        exchange_rate_uuid=exchange_rate['uuid']
+    )
     return transaction, exchange_rate, event
 
 
 def parse_transaction_additional_without_source(broker_operation: dict) -> (dict, dict, dict):
     # TODO architecture: here need fixed exchange currency rate
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
-    event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
-    event = {
-        'uuid': str(uuid.uuid4()),
-        'type': event_type,
-        'description': '',
-        'source_account_uuid': None
-    }
+    event = create_event(
+        event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
+        source_account_uuid=None
+    )
 
-    exchange_rate = {
-        'uuid': str(uuid.uuid4()),
-        'datetime': broker_operation['date'],
-        'asset_from_uuid': '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc', # TODO tech: remove hardcode it's the bank account
-        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
-        'exchange_rate_value': 1, # TODO tech: remove hardcode it's currency RUB asset
-    }
+    exchange_rate = create_exchange_rate(
+        datetime=broker_operation['date'],
+        asset_from_uuid='2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',  # TODO tech: remove hardcode it's the bank account
+        asset_to_uuid='2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
+        exchange_rate_value=1  # TODO tech: remove hardcode it's currency RUB asset
+    )
 
-    transaction = {
-        'uuid': str(uuid.uuid4()),
-        'operation': transaction_type,
-        'event_uuid': event['uuid'],
-        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
-        'quantity': abs(broker_operation['payment']),
-        'datetime': broker_operation['date'],
-        'exchange_rate_uuid': exchange_rate['uuid'],
-    }
+    transaction = create_transaction(
+        transaction_type=transaction_type,
+        event_uuid=event['uuid'],
+        account_uuid='8d8fde97-d609-4d0f-bed5-73d1a91d1111',  # TODO tech: remove hardcode account
+        quantity=abs(broker_operation['payment']),
+        datetime=broker_operation['date'],
+        exchange_rate_uuid=exchange_rate['uuid']
+    )
     return transaction, exchange_rate, event
 
 
