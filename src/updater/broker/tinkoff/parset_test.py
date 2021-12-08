@@ -1,5 +1,5 @@
 import pytest
-from updater.broker.tinkoff.parser import parse_asset, get_asset_type_from_broker_type, parse_transaction
+from updater.broker.tinkoff.parser import parse_assets, get_asset_type_from_broker_type, parse_transaction
 
 
 @pytest.mark.parametrize(
@@ -40,12 +40,43 @@ def test_get_asset_type_from_broker_type(input: str, expected_result: str) -> No
         )
     ]
 )
-def test_parse_asset(input: dict, expected_result: dict) -> None:
-    actual_result = parse_asset(input)
-    del actual_result['uuid']
-    del actual_result['created']
-    del actual_result['updated']
-    assert actual_result == expected_result
+def test_parse_assets(input: dict, expected_result: dict) -> None:
+    input = {
+        "trackingId": "7a0f3882d65628b9",
+        "payload": {
+            "instruments": [
+                {
+                    "figi": "BBG004730JJ5",
+                    "ticker": "MOEX",
+                    "isin": "RU000A0JR4A1",
+                    "minPriceIncrement": 0.01,
+                    "lot": 10,
+                    "currency": "RUB",
+                    "name": "Московская Биржа",
+                    "type": "Stock"
+                },
+            ]
+        }}
+    asset_expected_result = {
+        'asset_type': 'stock',
+        'ticker': 'MOEX',
+        'figi': 'BBG004730JJ5',
+        'isin': 'RU000A0JR4A1',
+        'name': 'Московская Биржа',
+        'description': None,
+    }
+    assets_actual_result, accounts_actual_result = parse_assets(input)
+    account_expected_result = {
+        'asset_uuid': assets_actual_result['BBG004730JJ5']['uuid']
+    }
+
+    del assets_actual_result['BBG004730JJ5']['uuid']
+    del assets_actual_result['BBG004730JJ5']['created']
+    del assets_actual_result['BBG004730JJ5']['updated']
+    assert assets_actual_result['BBG004730JJ5'] == asset_expected_result
+
+    del accounts_actual_result['BBG004730JJ5']['uuid']
+    assert accounts_actual_result['BBG004730JJ5'] == account_expected_result
 
 
 def test_parse_transaction_buy() -> None:
@@ -400,7 +431,7 @@ def test_parse_transaction_pay_in() -> None:
         "currency": "RUB",
         "status": "Done",
         "id": "1876201873"
-      }
+    }
     input_broker_assets = {}
     input_broker_accounts = {}
     transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,

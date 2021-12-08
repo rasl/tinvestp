@@ -14,15 +14,14 @@ def get_asset_type_from_broker_type(broker_asset_type: str) -> str | None:
     return broker_asset_types_map[broker_asset_type]
 
 
-def parse_asset(broker_item: dict) -> dict:
-    asset_type = get_asset_type_from_broker_type(broker_item['type'])
+def create_asset(asset_type: str, ticker: str, figi: str, isin: str, name: str):
     return {
         'uuid': str(uuid.uuid4()),
         'asset_type': asset_type,
-        'ticker': broker_item['ticker'],
-        'figi': broker_item['figi'],
-        'isin': broker_item['isin'],
-        'name': broker_item['name'],
+        'ticker': ticker,
+        'figi': figi,
+        'isin': isin,
+        'name': name,
         'description': None,
         'created': None,
         'updated': None,
@@ -40,7 +39,13 @@ def parse_assets(json_data: json) -> (dict, dict):
     assets = {}
     accounts = {}
     for broker_asset in json_data['payload']['instruments']:
-        parsed_asset = parse_asset(broker_asset)
+        parsed_asset = create_asset(
+            asset_type=get_asset_type_from_broker_type(broker_asset['type']),
+            ticker=broker_asset['ticker'],
+            figi=broker_asset['figi'],
+            isin=broker_asset['isin'],
+            name=broker_asset['name']
+        )
         assets[parsed_asset['figi']] = parsed_asset
         accounts[parsed_asset['figi']] = create_account_for_asset(parsed_asset['uuid'])
     return assets, accounts
