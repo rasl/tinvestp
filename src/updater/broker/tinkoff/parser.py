@@ -152,7 +152,8 @@ def create_exchange_rate(datetime: str, asset_from_uuid: str, asset_to_uuid: str
     return exchange_rate
 
 
-def create_transaction(transaction_type: str, event_uuid: str, account_uuid: str, quantity: int, datetime: str, exchange_rate_uuid: str):
+def create_transaction(transaction_type: str, event_uuid: str, account_uuid: str, quantity: int, datetime: str,
+                       exchange_rate_uuid: str):
     transaction = {
         'uuid': str(uuid.uuid4()),
         'operation': transaction_type,
@@ -190,7 +191,8 @@ def parse_transaction_buy(broker_operation: dict, assets: dict, accounts: dict) 
     return transaction, exchange_rate, event
 
 
-def parse_transaction_additional_with_source(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
+def parse_transaction_additional_with_source(broker_operation: dict, assets: dict, accounts: dict) -> \
+    (dict, dict, dict):
     # TODO architecture: here need fixed exchange currency rate
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
