@@ -113,22 +113,24 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
     if broker_operation['operationType'] == 'Buy':
         return parse_transaction_buy(
             broker_operation=broker_operation,
-            assets=assets, accounts=accounts,
+            assets=assets,
+            accounts=accounts,
             source_account_uuid='8d8fde97-d609-4d0f-bed5-73d1a91d1111', # TODO tech: remove hardcode it's the asset bank account
             asset_to_uuid='2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
         )
     if broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend']:
-        return parse_transaction_additional_with_source(
+        return parse_transaction_additional(
             broker_operation=broker_operation,
-            accounts=accounts,
+            source_account_uuid=accounts[broker_operation['figi']]['uuid'],
             asset_from_uuid='2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',  # TODO tech: remove hardcode it's the bank asset account
             asset_to_uuid='2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
             exchange_rate_value=1,  # TODO tech: remove hardcode it's currency RUB asset
             account_uuid='8d8fde97-d609-4d0f-bed5-73d1a91d1111',  # TODO tech: remove hardcode account
         )
     if broker_operation['operationType'] in ['ServiceCommission', 'PayIn']:
-        return parse_transaction_additional_without_source(
+        return parse_transaction_additional(
             broker_operation=broker_operation,
+            source_account_uuid=None,
             asset_from_uuid='2dee7cdb-0b00-4bc8-b0ab-e05a060522cc',  # TODO tech: remove hardcode it's the bank asset account
             asset_to_uuid='2689e5ba-c736-4596-874e-9c5e5b91e5fa',  # TODO tech: remove hardcode it's currency RUB asset
             exchange_rate_value=1,  # TODO tech: remove hardcode it's currency RUB asset
@@ -174,8 +176,12 @@ def create_transaction(transaction_type: str, event_uuid: str, account_uuid: str
     return transaction
 
 
-def parse_transaction_buy(broker_operation: dict, assets: dict, accounts: dict, source_account_uuid: str,
-                          asset_to_uuid: str) -> (dict, dict, dict):
+def parse_transaction_buy(broker_operation: dict,
+                          assets: dict,
+                          accounts: dict,
+                          source_account_uuid: str,
+                          asset_to_uuid: str
+                          ) -> (dict, dict, dict):
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event = create_event(
         event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
@@ -200,14 +206,18 @@ def parse_transaction_buy(broker_operation: dict, assets: dict, accounts: dict, 
     return transaction, exchange_rate, event
 
 
-def parse_transaction_additional_with_source(broker_operation: dict, accounts: dict, asset_from_uuid: str,
-                                             asset_to_uuid: str, exchange_rate_value: int, account_uuid: str) -> \
-    (dict, dict, dict):
+def parse_transaction_additional(broker_operation: dict,
+                                 source_account_uuid: str | None,
+                                 asset_from_uuid: str,
+                                 asset_to_uuid: str,
+                                 exchange_rate_value: int,
+                                 account_uuid: str
+                                 ) -> (dict, dict, dict):
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
     event = create_event(
         event_type=event_type,
-        source_account_uuid=accounts[broker_operation['figi']]['uuid']
+        source_account_uuid=source_account_uuid
     )
 
     exchange_rate = create_exchange_rate(
@@ -215,32 +225,6 @@ def parse_transaction_additional_with_source(broker_operation: dict, accounts: d
         asset_from_uuid=asset_from_uuid,
         asset_to_uuid=asset_to_uuid,
         exchange_rate_value=exchange_rate_value
-    )
-
-    transaction = create_transaction(
-        transaction_type=transaction_type,
-        event_uuid=event['uuid'],
-        account_uuid=account_uuid,
-        quantity=abs(broker_operation['payment']),
-        datetime=broker_operation['date'],
-        exchange_rate_uuid=exchange_rate['uuid']
-    )
-    return transaction, exchange_rate, event
-
-
-def parse_transaction_additional_without_source(broker_operation: dict, asset_from_uuid: str, asset_to_uuid: str,
-                                                exchange_rate_value: int, account_uuid: str) -> (dict, dict, dict):
-    transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
-    event = create_event(
-        event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
-        source_account_uuid=None
-    )
-
-    exchange_rate = create_exchange_rate(
-        datetime=broker_operation['date'],
-        asset_from_uuid=asset_from_uuid,
-        asset_to_uuid=asset_to_uuid,
-        exchange_rate_value=exchange_rate_value,
     )
 
     transaction = create_transaction(
