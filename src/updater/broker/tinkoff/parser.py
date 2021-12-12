@@ -1,5 +1,6 @@
 import json
 import uuid
+from updater.broker.exceptions import TransactionTypeException
 
 
 def get_asset_type_from_broker_type(broker_asset_type: str) -> str | None:
@@ -147,8 +148,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
             source_account_uuid=None,
         )
 
-    # TODO custom exception
-    raise Exception('Unexpected operation type=[' + broker_operation['operationType'] + ']')
+    raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
 
 
 def create_event(event_type: str, source_account_uuid: str | None):

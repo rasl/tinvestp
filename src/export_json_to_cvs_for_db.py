@@ -1,4 +1,4 @@
-import broker.tinkoff.parser as parser
+import updater.broker.tinkoff.parser as parser
 import json
 import csv
 
