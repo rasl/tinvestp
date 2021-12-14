@@ -458,3 +458,67 @@ def test_parse_transaction_pay_in() -> None:
         'description': '',
         'source_account_uuid': None,
     }
+
+
+def test_parse_transaction_sell() -> None:
+    input_broker_operation = {
+        "operationType": "Sell",
+        "date": "2021-12-07T15:34:37.245+03:00",
+        "isMarginCall": False,
+        "instrumentType": "Bond",
+        "figi": "BBG00FJV9WC4",
+        "quantity": 1,
+        "quantityExecuted": 1,
+        "price": 801.52,
+        "payment": 820.37,
+        "currency": "RUB",
+        "commission": {
+          "currency": "RUB",
+          "value": -0.32
+        },
+        "trades": [
+          {
+            "tradeId": "4730485875",
+            "date": "2021-12-07T15:34:37.245+03:00",
+            "quantity": 1,
+            "price": 801.52
+          }
+        ],
+        "status": "Done",
+        "id": "27942700107"
+      }
+
+    input_broker_assets = {
+        "BBG00FJV9WC4": {
+            "uuid": '00000000-0000-0000-0000-000000000000'
+        }
+    }
+    input_broker_accounts = {
+        "BBG00FJV9WC4": {
+            "uuid": '11111111-1111-1111-1111-111111111111'
+        }
+    }
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+                                                          input_broker_accounts)
+    del transaction['uuid']
+    assert transaction == {
+        'operation': 'income',
+        'event_uuid': event['uuid'],
+        'account_uuid': '8d8fde97-d609-4d0f-bed5-73d1a91d1111',
+        'quantity': 1,
+        'datetime': "2021-12-07T15:34:37.245+03:00",
+        'exchange_rate_uuid': exchange_rate['uuid'],
+    }
+    del exchange_rate['uuid']
+    assert exchange_rate == {
+        'datetime': "2021-12-07T15:34:37.245+03:00",
+        'asset_from_uuid': '00000000-0000-0000-0000-000000000000',
+        'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
+        'exchange_rate_value':  801.52,
+    }
+    del event['uuid']
+    assert event == {
+        'type': 'sell',
+        'description': '',
+        'source_account_uuid': '11111111-1111-1111-1111-111111111111',
+    }

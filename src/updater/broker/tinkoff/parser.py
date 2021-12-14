@@ -111,11 +111,12 @@ def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str
 
 
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
+    # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
     current_currency_asset = '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
     source_bank_account = '8d8fde97-d609-4d0f-bed5-73d1a91d1111'  # TODO tech: remove hardcode it's the asset bank account
     base_instrument_asset_type = '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc'  # TODO tech: remove hardcode it's the bank asset account
     base_instrument_exchange_rate_to_base_asset_type = 1 # TODO tech: remove hardcode it's currency RUB asset
-    if broker_operation['operationType'] == 'Buy':
+    if broker_operation['operationType'] in ['Buy']:
         return create_transaction_rate_event_exchange(
             transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
             event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
@@ -150,6 +151,18 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
             asset_to_uuid=current_currency_asset,
             account_uuid=source_bank_account,
             source_account_uuid=None,
+        )
+    if broker_operation['operationType'] in ['Sell']:
+        return create_transaction_rate_event_exchange(
+            transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
+            event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
+            datetime=broker_operation['date'],
+            exchange_rate_value=broker_operation['price'],
+            quantity=broker_operation['quantity'],
+            asset_from_uuid=assets[broker_operation['figi']]['uuid'],
+            asset_to_uuid=current_currency_asset,
+            account_uuid=source_bank_account,
+            source_account_uuid=accounts[broker_operation['figi']]['uuid'],
         )
 
     raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
