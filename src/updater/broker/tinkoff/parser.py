@@ -115,7 +115,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
     current_currency_asset = '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
     source_bank_account = '8d8fde97-d609-4d0f-bed5-73d1a91d1111'  # TODO tech: remove hardcode it's the asset bank account
     base_instrument_asset_type = '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc'  # TODO tech: remove hardcode it's the bank asset account
-    base_instrument_exchange_rate_to_base_asset_type = 1 # TODO tech: remove hardcode it's currency RUB asset
+    base_instrument_exchange_rate_to_base_asset_type = 1  # TODO tech: remove hardcode it's currency RUB asset
     if broker_operation['operationType'] in ['Buy']:
         return create_transaction_rate_event_exchange(
             transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),

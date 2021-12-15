@@ -473,20 +473,20 @@ def test_parse_transaction_sell() -> None:
         "payment": 820.37,
         "currency": "RUB",
         "commission": {
-          "currency": "RUB",
-          "value": -0.32
+            "currency": "RUB",
+            "value": -0.32
         },
         "trades": [
-          {
-            "tradeId": "4730485875",
-            "date": "2021-12-07T15:34:37.245+03:00",
-            "quantity": 1,
-            "price": 801.52
-          }
+            {
+                "tradeId": "4730485875",
+                "date": "2021-12-07T15:34:37.245+03:00",
+                "quantity": 1,
+                "price": 801.52
+            }
         ],
         "status": "Done",
         "id": "27942700107"
-      }
+    }
 
     input_broker_assets = {
         "BBG00FJV9WC4": {
@@ -514,7 +514,7 @@ def test_parse_transaction_sell() -> None:
         'datetime': "2021-12-07T15:34:37.245+03:00",
         'asset_from_uuid': '00000000-0000-0000-0000-000000000000',
         'asset_to_uuid': '2689e5ba-c736-4596-874e-9c5e5b91e5fa',
-        'exchange_rate_value':  801.52,
+        'exchange_rate_value': 801.52,
     }
     del event['uuid']
     assert event == {
