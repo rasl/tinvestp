@@ -130,7 +130,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
     base_instrument_asset_type = get_base_instrument_asset_type()
     base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
-    current_currency_asset = get_source_bank_account()
+    current_currency_asset = get_current_currency_assert()
     source_bank_account = get_source_bank_account()
     if broker_operation['operationType'] in ['Buy']:
         return create_transaction_rate_event_exchange(
