@@ -110,17 +110,28 @@ def get_event_type_from_broker_operation_type(broker_operation_type: str) -> str
     return broker_operation_types_map[broker_operation_type]
 
 
-def get_source_info():
-    current_currency_asset = '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
-    source_bank_account = '8d8fde97-d609-4d0f-bed5-73d1a91d1111'  # TODO tech: remove hardcode it's the asset bank account
-    base_instrument_asset_type = '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc'  # TODO tech: remove hardcode it's the bank asset account
-    base_instrument_exchange_rate_to_base_asset_type = 1  # TODO tech: remove hardcode it's currency RUB asset
-    return base_instrument_asset_type, base_instrument_exchange_rate_to_base_asset_type, current_currency_asset, source_bank_account
+def get_base_instrument_exchange_rate_to_base_asset_type():
+    return 1  # TODO tech: remove hardcode it's currency RUB asset
+
+
+def get_base_instrument_asset_type():
+    return '2dee7cdb-0b00-4bc8-b0ab-e05a060522cc'  # TODO tech: remove hardcode it's the bank asset account
+
+
+def get_source_bank_account():
+    return '8d8fde97-d609-4d0f-bed5-73d1a91d1111'  # TODO tech: remove hardcode it's the asset bank account
+
+
+def get_current_currency_assert():
+    return '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
 
 
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
-    base_instrument_asset_type, base_instrument_exchange_rate_to_base_asset_type, current_currency_asset, source_bank_account = get_source_info()
+    base_instrument_asset_type = get_base_instrument_asset_type()
+    base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
+    current_currency_asset = get_source_bank_account()
+    source_bank_account = get_source_bank_account()
     if broker_operation['operationType'] in ['Buy']:
         return create_transaction_rate_event_exchange(
             transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
