@@ -128,7 +128,6 @@ def get_current_currency_assert():
 
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
-    base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
     current_currency_asset = get_current_currency_assert()
     source_bank_account = get_source_bank_account()
     if broker_operation['operationType'] in ['Buy']:
@@ -146,6 +145,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         )
     if broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend']:
         base_instrument_asset_type = get_base_instrument_asset_type()
+        base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
         return create_transaction_rate_event_exchange(
             transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
             event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
@@ -159,6 +159,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         )
     if broker_operation['operationType'] in ['ServiceCommission', 'PayIn']:
         base_instrument_asset_type = get_base_instrument_asset_type()
+        base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
         return create_transaction_rate_event_exchange(
             transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
             event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
