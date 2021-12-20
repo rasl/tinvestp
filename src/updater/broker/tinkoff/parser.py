@@ -128,64 +128,51 @@ def get_current_currency_assert():
 
 def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
+    transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
+    event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
+    datetime = broker_operation['date']
     current_currency_asset = get_current_currency_assert()
-    source_bank_account = get_source_bank_account()
-    if broker_operation['operationType'] in ['Buy']:
-        related_asset = assets[broker_operation['figi']]['uuid']
-        return create_transaction_rate_event_exchange(
-            transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
-            event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
-            datetime=broker_operation['date'],
-            exchange_rate_value=broker_operation['price'],
-            quantity=broker_operation['quantity'],
-            asset_from_uuid=related_asset,
-            asset_to_uuid=current_currency_asset,
-            account_uuid=accounts[broker_operation['figi']]['uuid'],
-            source_account_uuid=source_bank_account,
-        )
-    if broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend']:
-        base_instrument_asset_type = get_base_instrument_asset_type()
-        base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
-        return create_transaction_rate_event_exchange(
-            transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
-            event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
-            datetime=broker_operation['date'],
-            exchange_rate_value=base_instrument_exchange_rate_to_base_asset_type,
-            quantity=abs(broker_operation['payment']),
-            asset_from_uuid=base_instrument_asset_type,
-            asset_to_uuid=current_currency_asset,
-            account_uuid=source_bank_account,
-            source_account_uuid=accounts[broker_operation['figi']]['uuid'],
-        )
-    if broker_operation['operationType'] in ['ServiceCommission', 'PayIn']:
-        base_instrument_asset_type = get_base_instrument_asset_type()
-        base_instrument_exchange_rate_to_base_asset_type = get_base_instrument_exchange_rate_to_base_asset_type()
-        return create_transaction_rate_event_exchange(
-            transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
-            event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
-            datetime=broker_operation['date'],
-            exchange_rate_value=base_instrument_exchange_rate_to_base_asset_type,
-            quantity=abs(broker_operation['payment']),
-            asset_from_uuid=base_instrument_asset_type,
-            asset_to_uuid=current_currency_asset,
-            account_uuid=source_bank_account,
-            source_account_uuid=None,
-        )
-    if broker_operation['operationType'] in ['Sell']:
-        related_asset = assets[broker_operation['figi']]['uuid']
-        return create_transaction_rate_event_exchange(
-            transaction_type=get_transaction_type_from_broker_operation_type(broker_operation['operationType']),
-            event_type=get_event_type_from_broker_operation_type(broker_operation['operationType']),
-            datetime=broker_operation['date'],
-            exchange_rate_value=broker_operation['price'],
-            quantity=broker_operation['quantity'],
-            asset_from_uuid=related_asset,
-            asset_to_uuid=current_currency_asset,
-            account_uuid=source_bank_account,
-            source_account_uuid=accounts[broker_operation['figi']]['uuid'],
-        )
 
-    raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
+    if broker_operation['operationType'] in ['Buy', 'Sell']:
+        related_asset = assets[broker_operation['figi']]['uuid']
+        exchange_rate_value = broker_operation['price']
+        quantity = broker_operation['quantity']
+    elif broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend', 'ServiceCommission', 'PayIn']:
+        related_asset = get_base_instrument_asset_type()
+        exchange_rate_value = get_base_instrument_exchange_rate_to_base_asset_type()
+        quantity = abs(broker_operation['payment'])
+    else:
+        raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
+
+    if broker_operation['operationType'] in ['Buy']:
+        account_uuid = accounts[broker_operation['figi']]['uuid']
+    elif broker_operation['operationType'] in ['Sell', 'BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend',
+                                               'TaxDividend', 'ServiceCommission', 'PayIn']:
+        account_uuid = get_source_bank_account()
+    else:
+        raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
+
+    if broker_operation['operationType'] in ['Buy']:
+        source_account_uuid = get_source_bank_account()
+    elif broker_operation['operationType'] in ['Sell', 'BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend',
+                                               'TaxDividend']:
+        source_account_uuid = accounts[broker_operation['figi']]['uuid']
+    elif broker_operation['operationType'] in ['ServiceCommission', 'PayIn']:
+        source_account_uuid = None
+    else:
+        raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
+
+    return create_transaction_rate_event_exchange(
+        transaction_type=transaction_type,
+        event_type=event_type,
+        datetime=datetime,
+        exchange_rate_value=exchange_rate_value,
+        quantity=quantity,
+        asset_from_uuid=related_asset,
+        asset_to_uuid=current_currency_asset,
+        account_uuid=account_uuid,
+        source_account_uuid=source_account_uuid,
+    )
 
 
 def create_event(event_type: str, source_account_uuid: str | None):
