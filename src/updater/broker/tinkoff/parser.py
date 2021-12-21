@@ -137,7 +137,8 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         related_asset = assets[broker_operation['figi']]['uuid']
         exchange_rate_value = broker_operation['price']
         quantity = broker_operation['quantity']
-    elif broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend', 'ServiceCommission', 'PayIn']:
+    elif broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend',
+                                               'ServiceCommission', 'PayIn']:
         related_asset = get_base_instrument_asset_type()
         exchange_rate_value = get_base_instrument_exchange_rate_to_base_asset_type()
         quantity = abs(broker_operation['payment'])
