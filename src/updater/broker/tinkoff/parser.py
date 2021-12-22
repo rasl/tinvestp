@@ -126,7 +126,7 @@ def get_current_currency_assert():
     return '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
 
 
-def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (dict, dict, dict):
+def parse_transaction(broker_operation: dict, assets: dict, transaction_account: str | None) -> (dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
@@ -146,7 +146,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         raise TransactionTypeException('Unexpected operation type=[' + broker_operation['operationType'] + ']')
 
     if broker_operation['operationType'] in ['Buy']:
-        account_uuid = accounts[broker_operation['figi']]['uuid']
+        account_uuid = transaction_account
     elif broker_operation['operationType'] in ['Sell', 'BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend',
                                                'TaxDividend', 'ServiceCommission', 'PayIn']:
         account_uuid = get_source_bank_account()
@@ -157,7 +157,7 @@ def parse_transaction(broker_operation: dict, assets: dict, accounts: dict) -> (
         source_account_uuid = get_source_bank_account()
     elif broker_operation['operationType'] in ['Sell', 'BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend',
                                                'TaxDividend']:
-        source_account_uuid = accounts[broker_operation['figi']]['uuid']
+        source_account_uuid = transaction_account
     elif broker_operation['operationType'] in ['ServiceCommission', 'PayIn']:
         source_account_uuid = None
     else:
@@ -249,7 +249,10 @@ def parse_transactions(json_data: json, assets: dict, accounts: dict) -> (dict, 
     exchange_rates = {}
     transactions = {}
     for broker_transaction in json_data['payload']['operations']:
-        parsed_transaction, er, e = parse_transaction(broker_transaction, assets, accounts)
+        transaction_account = None
+        if 'figi' in broker_transaction:
+            transaction_account = accounts[broker_transaction['figi']]['uuid']
+        parsed_transaction, er, e = parse_transaction(broker_transaction, assets, transaction_account)
         transactions[broker_transaction['id']] = parsed_transaction
         exchange_rates[broker_transaction['id']] = er
         events[broker_transaction['id']] = e
