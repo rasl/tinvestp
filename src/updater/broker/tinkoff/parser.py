@@ -126,7 +126,7 @@ def get_current_currency_assert():
     return '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
 
 
-def parse_transaction(broker_operation: dict, assets: dict, transaction_account: str | None) -> (dict, dict, dict):
+def parse_transaction(broker_operation: dict, related_asset: str | None, transaction_account: str | None) -> (dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
@@ -134,7 +134,7 @@ def parse_transaction(broker_operation: dict, assets: dict, transaction_account:
     current_currency_asset = get_current_currency_assert()
 
     if broker_operation['operationType'] in ['Buy', 'Sell']:
-        related_asset = assets[broker_operation['figi']]['uuid']
+        related_asset = related_asset
         exchange_rate_value = broker_operation['price']
         quantity = broker_operation['quantity']
     elif broker_operation['operationType'] in ['BrokerCommission', 'Coupon', 'PartRepayment', 'Dividend', 'TaxDividend',
@@ -252,7 +252,10 @@ def parse_transactions(json_data: json, assets: dict, accounts: dict) -> (dict, 
         transaction_account = None
         if 'figi' in broker_transaction:
             transaction_account = accounts[broker_transaction['figi']]['uuid']
-        parsed_transaction, er, e = parse_transaction(broker_transaction, assets, transaction_account)
+        related_asset = None
+        if 'figi' in broker_transaction:
+            related_asset = assets[broker_transaction['figi']]['uuid']
+        parsed_transaction, er, e = parse_transaction(broker_transaction, related_asset, transaction_account)
         transactions[broker_transaction['id']] = parsed_transaction
         exchange_rates[broker_transaction['id']] = er
         events[broker_transaction['id']] = e
