@@ -116,7 +116,8 @@ def test_parse_transaction_buy() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG004S68829"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG004S68829"]['uuid'],
                                                           input_broker_accounts["BBG004S68829"]['uuid'])
     del transaction['uuid']
     assert transaction == {
@@ -166,7 +167,8 @@ def test_parse_transaction_broker_commission() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG004S68829"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG004S68829"]['uuid'],
                                                           input_broker_accounts["BBG004S68829"]['uuid'])
     del transaction['uuid']
     assert transaction == {
@@ -214,7 +216,8 @@ def test_parse_transaction_coupon() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG00RP6D594"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG00RP6D594"]['uuid'],
                                                           input_broker_accounts["BBG00RP6D594"]['uuid'])
     del transaction['uuid']
     assert transaction == {
@@ -262,7 +265,8 @@ def test_parse_transaction_part_repayment() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG00HZ418L3"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG00HZ418L3"]['uuid'],
                                                           input_broker_accounts["BBG00HZ418L3"]['uuid'])
     del transaction['uuid']
     assert transaction == {
@@ -310,7 +314,8 @@ def test_parse_transaction_dividend() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG004S68B31"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG004S68B31"]['uuid'],
                                                           input_broker_accounts["BBG004S68B31"]['uuid'])
     del transaction['uuid']
     assert transaction == {
@@ -358,7 +363,8 @@ def test_parse_transaction_tax_dividend() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG004S68B31"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG004S68B31"]['uuid'],
                                                           input_broker_accounts["BBG004S68B31"]['uuid'])
     del transaction['uuid']
     assert transaction == {
@@ -498,7 +504,8 @@ def test_parse_transaction_sell() -> None:
             "uuid": '11111111-1111-1111-1111-111111111111'
         }
     }
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets["BBG00FJV9WC4"]['uuid'],
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation,
+                                                          input_broker_assets["BBG00FJV9WC4"]['uuid'],
                                                           input_broker_accounts["BBG00FJV9WC4"]['uuid'])
     del transaction['uuid']
     assert transaction == {

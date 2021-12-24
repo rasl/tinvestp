@@ -126,7 +126,8 @@ def get_current_currency_assert():
     return '2689e5ba-c736-4596-874e-9c5e5b91e5fa'  # TODO tech: remove hardcode it's currency RUB asset
 
 
-def parse_transaction(broker_operation: dict, related_asset: str | None, transaction_account: str | None) -> (dict, dict, dict):
+def parse_transaction(broker_operation: dict, related_asset: str | None, transaction_account: str | None) -> (
+dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
