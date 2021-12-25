@@ -401,7 +401,6 @@ def test_parse_transaction_service_commission() -> None:
         "id": "1876222841"
     }
     input_broker_assets = {}
-    input_broker_accounts = {}
     transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
                                                           None)
     del transaction['uuid']
@@ -439,7 +438,6 @@ def test_parse_transaction_pay_in() -> None:
         "id": "1876201873"
     }
     input_broker_assets = {}
-    input_broker_accounts = {}
     transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
                                                           None)
     del transaction['uuid']
