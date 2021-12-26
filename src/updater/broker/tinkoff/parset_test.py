@@ -106,19 +106,9 @@ def test_parse_transaction_buy() -> None:
         "status": "Done",
         "id": "27191692220"
     }
-    input_broker_assets = {
-        "BBG004S68829": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG004S68829": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG004S68829"]['uuid'],
-                                                          input_broker_accounts["BBG004S68829"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'outcome',
@@ -157,19 +147,9 @@ def test_parse_transaction_broker_commission() -> None:
         "status": "Done",
         "id": "1876311927"
     }
-    input_broker_assets = {
-        "BBG004S68829": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG004S68829": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG004S68829"]['uuid'],
-                                                          input_broker_accounts["BBG004S68829"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'outcome',
@@ -206,19 +186,9 @@ def test_parse_transaction_coupon() -> None:
         "status": "Done",
         "id": "1891186745"
     }
-    input_broker_assets = {
-        "BBG00RP6D594": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG00RP6D594": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG00RP6D594"]['uuid'],
-                                                          input_broker_accounts["BBG00RP6D594"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'income',
@@ -255,19 +225,9 @@ def test_parse_transaction_part_repayment() -> None:
         "status": "Done",
         "id": "1891182668"
     }
-    input_broker_assets = {
-        "BBG00HZ418L3": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG00HZ418L3": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG00HZ418L3"]['uuid'],
-                                                          input_broker_accounts["BBG00HZ418L3"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'income',
@@ -304,19 +264,9 @@ def test_parse_transaction_dividend() -> None:
         "status": "Done",
         "id": "1841616089"
     }
-    input_broker_assets = {
-        "BBG004S68B31": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG004S68B31": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG004S68B31"]['uuid'],
-                                                          input_broker_accounts["BBG004S68B31"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'income',
@@ -353,19 +303,9 @@ def test_parse_transaction_tax_dividend() -> None:
         "status": "Done",
         "id": "1841615748"
     }
-    input_broker_assets = {
-        "BBG004S68B31": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG004S68B31": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG004S68B31"]['uuid'],
-                                                          input_broker_accounts["BBG004S68B31"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'outcome',
@@ -491,20 +431,9 @@ def test_parse_transaction_sell() -> None:
         "status": "Done",
         "id": "27942700107"
     }
-
-    input_broker_assets = {
-        "BBG00FJV9WC4": {
-            "uuid": '00000000-0000-0000-0000-000000000000'
-        }
-    }
-    input_broker_accounts = {
-        "BBG00FJV9WC4": {
-            "uuid": '11111111-1111-1111-1111-111111111111'
-        }
-    }
     transaction, exchange_rate, event = parse_transaction(input_broker_operation,
-                                                          input_broker_assets["BBG00FJV9WC4"]['uuid'],
-                                                          input_broker_accounts["BBG00FJV9WC4"]['uuid'])
+                                                          '00000000-0000-0000-0000-000000000000',
+                                                          '11111111-1111-1111-1111-111111111111')
     del transaction['uuid']
     assert transaction == {
         'operation': 'income',
