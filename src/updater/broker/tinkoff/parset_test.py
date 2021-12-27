@@ -340,8 +340,7 @@ def test_parse_transaction_service_commission() -> None:
         "status": "Done",
         "id": "1876222841"
     }
-    input_broker_assets = {}
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, None,
                                                           None)
     del transaction['uuid']
     assert transaction == {
@@ -377,8 +376,7 @@ def test_parse_transaction_pay_in() -> None:
         "status": "Done",
         "id": "1876201873"
     }
-    input_broker_assets = {}
-    transaction, exchange_rate, event = parse_transaction(input_broker_operation, input_broker_assets,
+    transaction, exchange_rate, event = parse_transaction(input_broker_operation, None,
                                                           None)
     del transaction['uuid']
     assert transaction == {
