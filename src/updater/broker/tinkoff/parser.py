@@ -127,7 +127,7 @@ def get_current_currency_assert():
 
 
 def parse_transaction(broker_operation: dict, related_asset: str | None, transaction_account: str | None) -> (
-dict, dict, dict):
+    dict, dict, dict):
     # TODO architecture: one broker operation can produce some transactions, for example: sell, buy by differences price
     transaction_type = get_transaction_type_from_broker_operation_type(broker_operation['operationType'])
     event_type = get_event_type_from_broker_operation_type(broker_operation['operationType'])
